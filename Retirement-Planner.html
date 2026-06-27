@@ -1956,6 +1956,14 @@
       color: var(--warning);
     }
 
+    .col-compare-footnote {
+      font-size: 0.66rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+      width: 100%;
+      margin-top: 0.15rem;
+    }
+
     .col-panel-numbeo {
       font-size: 0.68rem;
       color: var(--text-muted);
@@ -5968,11 +5976,10 @@
                   <div class="col-panel-location" id="costOfLivingLocation">Your City, State / Country</div>
                   <div class="col-panel-value" id="costOfLivingRange">—</div>
                   <div class="col-panel-audience">Comfortable couple / family</div>
-                  <p class="col-panel-note" id="costOfLivingNote">Housing, food, transport &amp; leisure for a comfortable lifestyle</p>
+                  <p class="col-panel-note" id="costOfLivingNote">Core living benchmark: housing, food, transport &amp; leisure (excludes healthcare)</p>
                   <div class="col-panel-compare" id="costOfLivingCompare" hidden>
-                    <span class="col-compare-label">Your monthly spending</span>
-                    <span class="col-compare-value" id="costOfLivingPlanSpending">$4,000/mo</span>
-                    <span class="col-compare-vs" id="costOfLivingVsNote"></span>
+                    <p class="col-compare-vs" id="costOfLivingVsNote"></p>
+                    <p class="col-compare-footnote" id="costOfLivingCompareFootnote"></p>
                   </div>
                   <p class="col-panel-numbeo" id="costOfLivingNumbeoWrap">
                     For latest data, <a href="https://www.numbeo.com/cost-of-living/" id="costOfLivingNumbeoLink" target="_blank" rel="noopener noreferrer">click Numbeo →</a>
@@ -6637,7 +6644,8 @@
       generic: { min: null, max: null, note: "Enter your location above to see a tailored monthly estimate." },
     };
 
-    const COL_DESCRIPTION = "Housing, food, transport & leisure for a comfortable lifestyle";
+    const COL_DESCRIPTION = "Core living benchmark: housing, food, transport & leisure (excludes healthcare)";
+    const COL_COMPARE_FOOTNOTE = "Local range covers core expenses only — your plan total below includes healthcare.";
 
 
         const US_HEALTHCARE_COUPLE_EST = 18000;
@@ -6860,7 +6868,7 @@
       const tagSS = document.getElementById("planTagSS");
       if (tagSS) tagSS.textContent = `${fmt.format(getSsMonthlyBenefit(params))}/mo SS at ${params.ssStartAge}`;
 
-      updateCostOfLivingDisplay(getUserLocation(), getTotalMonthlySpending(params));
+      updateCostOfLivingDisplay(getUserLocation(), params);
       renderPlanSummary(params, end);
     }
 
@@ -7008,13 +7016,13 @@
       if (feedback) showSettingsToast("Plan updated");
     }
 
-    function updateCostOfLivingDisplay(loc = getUserLocation(), spending = null) {
+    function updateCostOfLivingDisplay(loc = getUserLocation(), params = null) {
       const est = getCostOfLivingEstimate(loc);
       const rangeEl = document.getElementById("costOfLivingRange");
       const locationEl = document.getElementById("costOfLivingLocation");
       const noteEl = document.getElementById("costOfLivingNote");
-      const planSpendEl = document.getElementById("costOfLivingPlanSpending");
       const vsNoteEl = document.getElementById("costOfLivingVsNote");
+      const compareFootnoteEl = document.getElementById("costOfLivingCompareFootnote");
       const compareEl = document.getElementById("costOfLivingCompare");
       const numbeoLink = document.getElementById("costOfLivingNumbeoLink");
       if (!rangeEl || !locationEl || !noteEl) return;
@@ -7035,14 +7043,24 @@
       rangeEl.textContent = formatCostOfLivingRange(est.min, est.max, est.maxPlus);
       noteEl.textContent = est.note ? `${COL_DESCRIPTION} · ${est.note}` : COL_DESCRIPTION;
 
-      const effectiveSpending = spending ?? readNumericField("spending", PLAN_DEFAULT.spending);
-      if (planSpendEl) planSpendEl.textContent = `${fmt.format(effectiveSpending)}/mo`;
+      const totalSpending = params
+        ? getTotalMonthlySpending(params)
+        : readNumericField("spending", PLAN_DEFAULT.spending);
+      const healthcareMonthly = params
+        ? getHealthcareMonthlyAtRetirement(params)
+        : 0;
+
       if (compareEl) compareEl.hidden = !hasUserLocation(loc);
 
-      const comparison = getCostOfLivingComparison(effectiveSpending, est);
+      const comparison = getCostOfLivingComparison(totalSpending, est, loc, healthcareMonthly);
       if (vsNoteEl) {
         vsNoteEl.textContent = comparison.text;
         vsNoteEl.className = `col-compare-vs${comparison.className ? ` ${comparison.className}` : ""}`;
+      }
+      if (compareFootnoteEl) {
+        compareFootnoteEl.textContent = healthcareMonthly > 0
+          ? `${COL_COMPARE_FOOTNOTE} Healthcare adds about ${fmt.format(healthcareMonthly)}/mo to your plan.`
+          : COL_COMPARE_FOOTNOTE;
       }
     }
 
@@ -7532,7 +7550,7 @@
       }
 
       updateDynamicSections(params);
-      updateCostOfLivingDisplay(loc, getTotalMonthlySpending(params));
+      updateCostOfLivingDisplay(loc, params);
       updateTaxSectionUI(params);
     }
 
@@ -7781,28 +7799,33 @@
       return hasUserLocation(loc) ? `${PLAN_NAME} — ${loc}` : PLAN_NAME;
     }
 
-    function getCostOfLivingComparison(spending, est) {
-      if (spending == null || est.min == null || est.max == null) {
+    function getColComparisonQualifier(spending, est) {
+      if (spending < est.min) {
+        const gap = est.min - spending;
+        const threshold = Math.max(350, est.min * 0.08);
+        return { phrase: gap <= threshold ? "slightly below" : "below", className: "below" };
+      }
+      if (spending > est.max) {
+        const gap = spending - est.max;
+        const threshold = Math.max(350, est.max * 0.08);
+        return { phrase: gap <= threshold ? "slightly above" : "above", className: "above" };
+      }
+      return { phrase: "within", className: "within" };
+    }
+
+    function getCostOfLivingComparison(totalSpending, est, loc = getUserLocation(), healthcareMonthly = 0) {
+      if (totalSpending == null || est.min == null || est.max == null) {
         return { text: "", className: "" };
       }
 
       const rangeLabel = formatCostOfLivingRange(est.min, est.max, est.maxPlus).replace(/\/mo$/, "");
+      const cityLabel = hasUserLocation(loc) ? loc : "this location";
+      const { phrase, className } = getColComparisonQualifier(totalSpending, est);
+      const healthcareNote = healthcareMonthly > 0 ? " (incl. healthcare)" : "";
 
-      if (spending < est.min) {
-        return {
-          text: `${fmt.format(spending)}/mo is below the ${rangeLabel} local range — about ${fmt.format(est.min - spending)}/mo under the low end`,
-          className: "below",
-        };
-      }
-      if (spending > est.max) {
-        return {
-          text: `${fmt.format(spending)}/mo is above the ${rangeLabel} local range — about ${fmt.format(spending - est.max)}/mo over the high end`,
-          className: "above",
-        };
-      }
       return {
-        text: `${fmt.format(spending)}/mo fits within the ${rangeLabel} local range`,
-        className: "within",
+        text: `Your monthly spending of ${fmt.format(totalSpending)}${healthcareNote} is ${phrase} the ${rangeLabel} core living range for ${cityLabel}.`,
+        className,
       };
     }
 
