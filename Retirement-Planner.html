@@ -1956,6 +1956,26 @@
       color: var(--warning);
     }
 
+    .col-panel-numbeo {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+      line-height: 1.4;
+    }
+
+    .col-panel-numbeo a {
+      color: var(--accent-soft);
+      font-weight: 600;
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .col-panel-numbeo a:hover {
+      color: var(--accent);
+      border-bottom-color: var(--accent-border);
+    }
+
     .plan-summary-main .compare-balance {
       font-size: 1.75rem;
     }
@@ -5954,6 +5974,9 @@
                     <span class="col-compare-value" id="costOfLivingPlanSpending">$4,000/mo</span>
                     <span class="col-compare-vs" id="costOfLivingVsNote"></span>
                   </div>
+                  <p class="col-panel-numbeo" id="costOfLivingNumbeoWrap">
+                    For latest data, <a href="https://www.numbeo.com/cost-of-living/" id="costOfLivingNumbeoLink" target="_blank" rel="noopener noreferrer">click Numbeo →</a>
+                  </p>
                 </div>
               </div>
             </div>
@@ -6567,21 +6590,50 @@
 
     const DEFAULT_LOCATION = "Your City, State / Country";
 
-    const COST_OF_LIVING_PRESETS = {
-      "nashville tn": { min: 4500, max: 6000 },
-      "nashville tennessee": { min: 4500, max: 6000 },
-      "austin tx": { min: 5000, max: 7000 },
-      "austin texas": { min: 5000, max: 7000 },
-      "denver co": { min: 4800, max: 6500 },
-      "denver colorado": { min: 4800, max: 6500 },
-      "lisbon portugal": { min: 3000, max: 4500 },
-      "porto portugal": { min: 2800, max: 4000 },
-    };
+    const COL_TIER_PREMIUM = { min: 7000, max: 10000, maxPlus: true };
+    const COL_TIER_HIGH = { min: 6000, max: 8500 };
+    const COL_TIER_MAJOR = { min: 5000, max: 7000 };
+    const COL_TIER_SUNBELT = { min: 4500, max: 6500 };
+    const COL_TIER_MID_SOUTH = { min: 4000, max: 5500 };
+    const COL_TIER_INTERNATIONAL = { min: 3000, max: 4500 };
+    const COL_TIER_UNKNOWN_US = { min: 4500, max: 6500, note: "Estimate — adjust as needed" };
+
+    const COL_CITY_TIERS = [
+      {
+        tier: COL_TIER_PREMIUM,
+        patterns: ["new york", "manhattan", "brooklyn", "queens", "bronx", "los angeles", "san francisco"],
+      },
+      {
+        tier: COL_TIER_HIGH,
+        patterns: ["boston", "seattle", "washington dc", "district of columbia"],
+      },
+      {
+        tier: COL_TIER_MAJOR,
+        patterns: ["chicago", "austin", "denver"],
+      },
+      {
+        tier: COL_TIER_SUNBELT,
+        patterns: ["atlanta", "dallas", "houston", "las vegas", "orlando"],
+      },
+      {
+        tier: COL_TIER_MID_SOUTH,
+        patterns: ["nashville", "virginia beach", "richmond"],
+      },
+    ];
+
+    const US_MIDWEST_SOUTH_ABBRS = new Set([
+      "al", "ar", "fl", "ga", "ia", "il", "in", "ks", "ky", "la", "mi", "mn",
+      "mo", "ms", "nc", "nd", "ne", "oh", "ok", "sc", "sd", "tn", "tx", "va", "wi", "wv",
+    ]);
+
+    const US_MIDWEST_SOUTH_NAMES = new Set([
+      "alabama", "arkansas", "florida", "georgia", "iowa", "illinois", "indiana", "kansas",
+      "kentucky", "louisiana", "michigan", "minnesota", "missouri", "mississippi",
+      "north carolina", "north dakota", "nebraska", "ohio", "oklahoma", "south carolina",
+      "south dakota", "tennessee", "texas", "virginia", "wisconsin", "west virginia",
+    ]);
 
     const COST_OF_LIVING_REGION_DEFAULTS = {
-      us: { min: 4000, max: 5500, note: "Typical US metro range for a comfortable couple — varies by city and lifestyle." },
-      eu: { min: 2800, max: 4200, note: "Many European locations run below US averages for a comparable lifestyle." },
-      international: { min: 3000, max: 4500, note: "International estimate — confirm with local cost-of-living sources." },
       generic: { min: null, max: null, note: "Enter your location above to see a tailored monthly estimate." },
     };
 
@@ -6808,7 +6860,7 @@
       const tagSS = document.getElementById("planTagSS");
       if (tagSS) tagSS.textContent = `${fmt.format(getSsMonthlyBenefit(params))}/mo SS at ${params.ssStartAge}`;
 
-      updateCostOfLivingDisplay(getUserLocation(), params.spending);
+      updateCostOfLivingDisplay(getUserLocation(), getTotalMonthlySpending(params));
       renderPlanSummary(params, end);
     }
 
@@ -6964,9 +7016,14 @@
       const planSpendEl = document.getElementById("costOfLivingPlanSpending");
       const vsNoteEl = document.getElementById("costOfLivingVsNote");
       const compareEl = document.getElementById("costOfLivingCompare");
+      const numbeoLink = document.getElementById("costOfLivingNumbeoLink");
       if (!rangeEl || !locationEl || !noteEl) return;
 
       locationEl.textContent = hasUserLocation(loc) ? loc : DEFAULT_LOCATION;
+
+      if (numbeoLink) {
+        numbeoLink.href = getNumbeoUrl("cost-of-living", loc);
+      }
 
       if (est.min == null || est.max == null) {
         rangeEl.textContent = "—";
@@ -6975,12 +7032,12 @@
         return;
       }
 
-      rangeEl.textContent = formatCostOfLivingRange(est.min, est.max);
-      noteEl.textContent = COL_DESCRIPTION;
+      rangeEl.textContent = formatCostOfLivingRange(est.min, est.max, est.maxPlus);
+      noteEl.textContent = est.note ? `${COL_DESCRIPTION} · ${est.note}` : COL_DESCRIPTION;
 
       const effectiveSpending = spending ?? readNumericField("spending", PLAN_DEFAULT.spending);
       if (planSpendEl) planSpendEl.textContent = `${fmt.format(effectiveSpending)}/mo`;
-      if (compareEl) compareEl.hidden = false;
+      if (compareEl) compareEl.hidden = !hasUserLocation(loc);
 
       const comparison = getCostOfLivingComparison(effectiveSpending, est);
       if (vsNoteEl) {
@@ -7475,7 +7532,7 @@
       }
 
       updateDynamicSections(params);
-      updateCostOfLivingDisplay(loc, params.spending);
+      updateCostOfLivingDisplay(loc, getTotalMonthlySpending(params));
       updateTaxSectionUI(params);
     }
 
@@ -7728,52 +7785,83 @@
       if (spending == null || est.min == null || est.max == null) {
         return { text: "", className: "" };
       }
+
+      const rangeLabel = formatCostOfLivingRange(est.min, est.max, est.maxPlus).replace(/\/mo$/, "");
+
       if (spending < est.min) {
         return {
-          text: `Below local benchmark — about ${fmt.format(est.min - spending)}/mo under the low end`,
+          text: `${fmt.format(spending)}/mo is below the ${rangeLabel} local range — about ${fmt.format(est.min - spending)}/mo under the low end`,
           className: "below",
         };
       }
       if (spending > est.max) {
         return {
-          text: `Above local benchmark — about ${fmt.format(spending - est.max)}/mo over the high end`,
+          text: `${fmt.format(spending)}/mo is above the ${rangeLabel} local range — about ${fmt.format(spending - est.max)}/mo over the high end`,
           className: "above",
         };
       }
-      return { text: "Within comfortable range for this location", className: "within" };
+      return {
+        text: `${fmt.format(spending)}/mo fits within the ${rangeLabel} local range`,
+        className: "within",
+      };
     }
 
-    function formatCostOfLivingRange(min, max) {
+    function formatCostOfLivingRange(min, max, maxPlus = false) {
       if (min == null || max == null) return "—";
-      return `${fmt.format(min)} – ${fmt.format(max)}/mo`;
+      const maxStr = maxPlus ? `${fmt.format(max)}+` : fmt.format(max);
+      return `${fmt.format(min)} – ${maxStr}/mo`;
+    }
+
+    function locationMatchesColCity(key, pattern) {
+      if (pattern === "district of columbia") {
+        return /\b(dc|district of columbia)\b/.test(key) || /,\s*dc$/.test(key);
+      }
+      return key.includes(pattern);
+    }
+
+    function isMidwestOrSouthUS(loc) {
+      const us = parseUSCityState(loc);
+      if (us?.abbr) {
+        return US_MIDWEST_SOUTH_ABBRS.has(us.abbr.toLowerCase());
+      }
+
+      const key = normalizeLocationKey(loc);
+      return US_MIDWEST_SOUTH_NAMES.has(key)
+        || US_MIDWEST_SOUTH_NAMES.has(key.split(/\s+/).slice(-1)[0] || "");
     }
 
     function getCostOfLivingEstimate(loc = getUserLocation()) {
-      const key = normalizeLocationKey(loc);
-      if (COST_OF_LIVING_PRESETS[key]) {
-        return { ...COST_OF_LIVING_PRESETS[key], matched: true };
-      }
-
-      if (key.includes("nashville")) {
-        return { ...COST_OF_LIVING_PRESETS["nashville tn"], matched: true };
-      }
-      if (key.includes("austin")) {
-        return { ...COST_OF_LIVING_PRESETS["austin tx"], matched: true };
-      }
-      if (key.includes("denver")) {
-        return { ...COST_OF_LIVING_PRESETS["denver co"], matched: true };
-      }
-      if (key.includes("lisbon") || key.includes("portugal")) {
-        return { ...COST_OF_LIVING_PRESETS["lisbon portugal"], matched: true };
-      }
-
       if (isPlaceholderLocation(loc)) {
         return { ...COST_OF_LIVING_REGION_DEFAULTS.generic, matched: false };
       }
 
+      const key = normalizeLocationKey(loc);
+
+      if (/^la\s+(ca|california)$/.test(key) || /^sf\s+(ca|california)$/.test(key) || key === "nyc") {
+        return { ...COL_TIER_PREMIUM, matched: true };
+      }
+
+      for (const { tier, patterns } of COL_CITY_TIERS) {
+        for (const pattern of patterns) {
+          if (locationMatchesColCity(key, pattern)) {
+            return { ...tier, matched: true };
+          }
+        }
+      }
+
       const region = getLocationRegion(loc);
-      const fallback = COST_OF_LIVING_REGION_DEFAULTS[region] || COST_OF_LIVING_REGION_DEFAULTS.international;
-      return { ...fallback, matched: false };
+      if (region === "international" || region === "eu") {
+        return { ...COL_TIER_INTERNATIONAL, matched: false };
+      }
+
+      if (region === "us") {
+        if (isMidwestOrSouthUS(loc)) {
+          return { ...COL_TIER_MID_SOUTH, matched: false };
+        }
+        return { ...COL_TIER_UNKNOWN_US, matched: false };
+      }
+
+      return { ...COL_TIER_INTERNATIONAL, matched: false };
     }
 
     function normalizeLocationKey(loc) {
