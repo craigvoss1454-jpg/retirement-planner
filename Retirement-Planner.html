@@ -4794,6 +4794,73 @@
       letter-spacing: 0.03em;
     }
 
+    .spending-need-note {
+      display: block;
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: var(--text-muted, #9ca3af);
+      line-height: 1.35;
+    }
+
+    .surplus-note {
+      display: block;
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--accent);
+      line-height: 1.35;
+      margin-top: 0.1rem;
+    }
+
+    .shortfall-note {
+      display: block;
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: #f87171;
+      line-height: 1.35;
+      margin-top: 0.1rem;
+    }
+
+    .pension-only-banner {
+      margin: 0.65rem 0 0;
+      padding: 0.7rem 0.9rem;
+      border-radius: 10px;
+      border: 1px solid var(--accent-border);
+      background: var(--accent-muted);
+      color: var(--text, #e5e7eb);
+      font-size: 0.88rem;
+      line-height: 1.45;
+    }
+
+    .pension-only-banner strong {
+      color: var(--accent);
+    }
+
+    .pension-only-banner.shortfall {
+      border-color: rgba(248, 113, 113, 0.45);
+      background: rgba(248, 113, 113, 0.12);
+    }
+
+    .pension-only-banner.shortfall strong {
+      color: #f87171;
+    }
+
+    .pension-only-banner.partial {
+      border-color: rgba(251, 191, 36, 0.4);
+      background: rgba(251, 191, 36, 0.1);
+    }
+
+    .pension-only-banner.partial strong {
+      color: #fbbf24;
+    }
+
+    tr.pension-surplus-row td {
+      /* keep default styling */
+    }
+
+    tr.pension-shortfall-row td {
+      background: rgba(248, 113, 113, 0.06);
+    }
+
     .inflow-event {
       display: block;
       font-size: 0.7rem;
@@ -5488,7 +5555,7 @@
                 <div class="slider-label-row">
                   <span class="field-label-row">
                     <label for="sliderRetirementAge">Retire age</label>
-                    <span class="info-tip field-tip" tabindex="0" data-tip="When you stop working and start drawing from your portfolio. Pension lump sum arrives this year.">?</span>
+                    <span class="info-tip field-tip" tabindex="0" data-tip="When you stop working. Pension lump sum arrives this year. Portfolio withdrawals can start later via Age I start withdrawals.">?</span>
                   </span>
                   <div class="slider-value-box slider-age-display">
                     <input type="number" class="slider-age-input" id="retirementAge" value="65" min="50" max="75" step="1" aria-label="Retirement age">
@@ -5496,8 +5563,22 @@
                 </div>
                 <input type="range" class="premium-slider" id="sliderRetirementAge" min="50" max="75" step="1" value="65" aria-label="Retirement age slider" />
                 <div class="slider-bounds"><span>50</span><span>75</span></div>
-                <p class="field-micro-hint">When you stop working and start drawing from savings — pension lump sum arrives this year</p>
+                <p class="field-micro-hint">When you stop working — pension lump sum arrives this year</p>
                 
+              </div>
+              <div class="slider-control slider-control-withdrawal-start">
+                <div class="slider-label-row">
+                  <span class="field-label-row">
+                    <label for="sliderWithdrawalStartAge">Age I start withdrawals</label>
+                    <span class="info-tip field-tip" tabindex="0" data-tip="When portfolio withdrawals begin. If later than retire age, gap years are funded from cash buffer / savings ($0 from the retirement portfolio) so invested assets can keep growing.">?</span>
+                  </span>
+                  <div class="slider-value-box slider-age-display">
+                    <input type="number" class="slider-age-input" id="withdrawalStartAge" value="65" min="50" max="85" step="1" aria-label="Age I start withdrawals">
+                  </div>
+                </div>
+                <input type="range" class="premium-slider" id="sliderWithdrawalStartAge" min="50" max="85" step="1" value="65" aria-label="Age I start withdrawals slider" />
+                <div class="slider-bounds"><span id="withdrawalStartAgeMinLabel">50</span><span id="withdrawalStartAgeMaxLabel">75</span></div>
+                <p class="field-micro-hint" id="withdrawalStartAgeHint">Same as retire age = start drawing immediately · later ages use cash buffer for the gap</p>
               </div>
               <div class="slider-control">
                 <div class="slider-label-row">
@@ -5738,13 +5819,25 @@
             <div class="input-group">
               <span class="field-label-row">
                 <label for="pension">Pension / other lump sum</label>
-                <span class="info-tip field-tip" tabindex="0" data-tip="One-time pension payout at retirement — added to portfolio in your retirement year.">?</span>
+                <span class="info-tip field-tip" tabindex="0" data-tip="One-time pension payout at retirement — added to portfolio in your retirement year. Can be combined with monthly pension income below.">?</span>
               </span>
               <div class="input-wrap">
                 <span class="input-prefix">$</span>
                 <input type="text" class="has-prefix currency-num-input" id="pension" value="300,000" inputmode="numeric" data-min="0" data-max="10000000" data-step="1" aria-label="Pension lump sum">
               </div>
-              <p class="field-micro-hint">Received at retirement age</p>
+              <p class="field-micro-hint">One-time at retirement age · optional with monthly income</p>
+            </div>
+
+            <div class="input-group">
+              <span class="field-label-row">
+                <label for="pensionMonthly">Monthly Pension Income</label>
+                <span class="info-tip field-tip" tabindex="0" data-tip="Recurring monthly pension paid starting at retirement age. Reduces portfolio withdrawals each year (in addition to any lump sum). Default $0.">?</span>
+              </span>
+              <div class="input-wrap">
+                <span class="input-prefix">$</span>
+                <input type="text" class="has-prefix currency-num-input" id="pensionMonthly" value="0" inputmode="numeric" data-min="0" data-max="50000" data-step="50" aria-label="Monthly pension income">
+              </div>
+              <p class="field-micro-hint">Steady income from retirement age onward · default $0</p>
             </div>
 
             <div class="input-group">
@@ -5945,7 +6038,7 @@
             <div class="plan-summary-body">
               <div class="plan-summary-columns">
                 <div class="plan-summary-main">
-                  <div class="compare-balance-label">Balance at age 90</div>
+                  <div class="compare-balance-label" id="planSummaryBalanceLabel">Balance at age 90</div>
                   <div class="compare-balance" id="planSummaryBalance">—</div>
                   <div class="compare-meta" id="planSummaryMeta">—</div>
                   <div class="compare-tags" id="planSummaryTags">
@@ -5953,7 +6046,9 @@
                     <span class="compare-tag" id="planTagSpending">$4,000/mo total</span>
                     <span class="compare-tag" id="planTagReturn">6.5% return</span>
                     <span class="compare-tag" id="planTagSS">SS at 62</span>
+                    <span class="compare-tag" id="planTagPension" hidden>Pension $0/mo</span>
                   </div>
+                  <p class="pension-only-banner" id="pensionOnlyBanner" hidden></p>
                 </div>
                 <div class="compare-withdrawal-breakdown plan-withdrawal-panel">
                   <div class="compare-wd-title">Withdrawals</div>
@@ -5961,8 +6056,16 @@
                     <span class="compare-wd-label">Monthly spending</span>
                     <span class="compare-wd-value" id="planSummarySpending">—</span>
                   </div>
+                  <div class="compare-wd-row" id="planSummaryPensionRow" hidden>
+                    <span class="compare-wd-label">Monthly pension income<span class="info-tip" tabindex="0" data-tip="Recurring pension starting at retirement age — reduces how much you need to withdraw from retirement accounts.">?</span></span>
+                    <span class="compare-wd-value" id="planSummaryPension">—</span>
+                  </div>
+                  <div class="compare-wd-row" id="planSummarySsRow" hidden>
+                    <span class="compare-wd-label">Social Security</span>
+                    <span class="compare-wd-value" id="planSummarySs">—</span>
+                  </div>
                   <div class="compare-wd-row compare-wd-gross">
-                    <span class="compare-wd-label">Gross withdrawal needed<span class="info-tip" tabindex="0" data-tip="How much to pull from retirement accounts before taxes, so you still have your target spending left after estimated taxes.">?</span></span>
+                    <span class="compare-wd-label">Gross withdrawal needed<span class="info-tip" tabindex="0" data-tip="How much to pull from retirement accounts before taxes, so you still have your target spending left after estimated taxes (and after pension/SS income).">?</span></span>
                     <span class="compare-wd-value" id="planSummaryGross">—</span>
                   </div>
                   <div class="compare-wd-row">
@@ -6845,17 +6948,106 @@
       return clampRetirementAge(readNumericField("retirementAge", 65));
     }
 
+    function clampWithdrawalStartAge(age, retirementAge = readRetirementAge()) {
+      const ret = clampRetirementAge(retirementAge);
+      return Math.min(ret + 10, Math.max(ret, Math.round(Number(age) || ret)));
+    }
+
+    function readWithdrawalStartAge(retirementAge = readRetirementAge()) {
+      const ret = clampRetirementAge(retirementAge);
+      return clampWithdrawalStartAge(readNumericField("withdrawalStartAge", ret), ret);
+    }
+
+    function updateWithdrawalStartAgeBoundsLabels(retirementAge = readRetirementAge()) {
+      const ret = clampRetirementAge(retirementAge);
+      const minEl = document.getElementById("withdrawalStartAgeMinLabel");
+      const maxEl = document.getElementById("withdrawalStartAgeMaxLabel");
+      if (minEl) minEl.textContent = String(ret);
+      if (maxEl) maxEl.textContent = String(ret + 10);
+      const hint = document.getElementById("withdrawalStartAgeHint");
+      if (hint) {
+        hint.textContent = `Range ${ret}–${ret + 10} · same as retire age = draw immediately · later ages use cash buffer for the gap`;
+      }
+    }
+
+    function syncWithdrawalStartAgeBounds(prevRetirementAge = null) {
+      const ret = readRetirementAge();
+      const slider = document.getElementById("sliderWithdrawalStartAge");
+      const input = document.getElementById("withdrawalStartAge");
+      if (!slider || !input) return readWithdrawalStartAge(ret);
+
+      slider.min = ret;
+      slider.max = ret + 10;
+      input.min = ret;
+      input.max = ret + 10;
+
+      let val = readNumericField("withdrawalStartAge", ret);
+      if (prevRetirementAge != null && Math.round(val) === Math.round(prevRetirementAge)) {
+        val = ret;
+      }
+      val = clampWithdrawalStartAge(val, ret);
+
+      committedNumericValues.set("withdrawalStartAge", val);
+      if (input !== document.activeElement) input.value = String(val);
+      slider.value = val;
+      updateSliderFill(slider);
+      updateWithdrawalStartAgeBoundsLabels(ret);
+      return val;
+    }
+
+    function getWithdrawalGapYears(params) {
+      const ret = params?.retirementAge ?? readRetirementAge();
+      const start = params?.withdrawalStartAge ?? ret;
+      return Math.max(0, start - ret);
+    }
+
     function updatePlanSummary(result) {
       const params = result.params;
       const end = getEndBalanceSummary(result.rows, params);
+      const pensionOnly = isPensionOnlyPlan(params);
+      const coverage = end.coverage || (pensionOnly
+        ? getPensionOnlyCoverageSummary(params, result.rows)
+        : null);
+
+      const balLabel = document.getElementById("planSummaryBalanceLabel");
       const balEl = document.getElementById("planSummaryBalance");
       if (!balEl) return;
-      balEl.textContent = end.balance >= 1_000_000
-        ? fmtMillions(end.balance)
-        : fmt.format(end.balance);
-      balEl.className = "compare-balance" + (end.className ? ` ${end.className}` : "");
+
+      if (pensionOnly && coverage) {
+        if (balLabel) balLabel.textContent = coverage.fullCoverage
+          ? "Pension-funded plan"
+          : "Pension income plan";
+        balEl.textContent = coverage.surplusMo >= 0
+          ? `+${fmt.format(coverage.surplusMo)}/mo`
+          : `${fmt.format(coverage.surplusMo)}/mo`;
+        balEl.className = "compare-balance" + (end.className ? ` ${end.className}` : "");
+      } else {
+        if (balLabel) balLabel.textContent = "Balance at age 90";
+        balEl.textContent = end.balance >= 1_000_000
+          ? fmtMillions(end.balance)
+          : fmt.format(end.balance);
+        balEl.className = "compare-balance" + (end.className ? ` ${end.className}` : "");
+      }
+
       const metaEl = document.getElementById("planSummaryMeta");
       if (metaEl) metaEl.textContent = end.meta;
+
+      const banner = document.getElementById("pensionOnlyBanner");
+      if (banner) {
+        if (coverage) {
+          banner.hidden = false;
+          banner.className = "pension-only-banner"
+            + (coverage.bannerClass ? ` ${coverage.bannerClass}` : "");
+          banner.innerHTML = `<strong>${coverage.message}</strong>`
+            + (coverage.fullCoverage
+              ? ` · No 401(k) withdrawals needed through age ${params.lifeExpectancy}.`
+              : "");
+        } else {
+          banner.hidden = true;
+          banner.textContent = "";
+          banner.className = "pension-only-banner";
+        }
+      }
 
       updateWithdrawalBreakdown("planSummary", getWithdrawalEducation(result));
 
@@ -6864,9 +7056,23 @@
         tagSpending.textContent = `${fmt.format(getTotalMonthlySpending(params))}/mo total`;
       }
       const tagReturn = document.getElementById("planTagReturn");
-      if (tagReturn) tagReturn.textContent = `${params.returnRate * 100}% return`;
+      if (tagReturn) {
+        tagReturn.textContent = pensionOnly
+          ? "Pension-only"
+          : `${params.returnRate * 100}% return`;
+      }
       const tagSS = document.getElementById("planTagSS");
       if (tagSS) tagSS.textContent = `${fmt.format(getSsMonthlyBenefit(params))}/mo SS at ${params.ssStartAge}`;
+      const pensionTag = document.getElementById("planTagPension");
+      if (pensionTag) {
+        const pm = Math.max(0, Number(params.pensionMonthly) || 0);
+        if (pm > 0) {
+          pensionTag.hidden = false;
+          pensionTag.textContent = `Pension ${fmt.format(pm)}/mo`;
+        } else {
+          pensionTag.hidden = true;
+        }
+      }
 
       updateCostOfLivingDisplay(getUserLocation(), params);
       renderPlanSummary(params, end);
@@ -6875,6 +7081,7 @@
     const CURRENCY_FIELD_CONFIGS = [
       { id: "k401", min: 0, max: 10000000, step: 1, currency: true },
       { id: "pension", min: 0, max: 10000000, step: 1, currency: true },
+      { id: "pensionMonthly", min: 0, max: 50000, step: 50, currency: true },
       { id: "house", min: 0, max: 5000000, step: 1000, currency: true },
     ];
 
@@ -6882,9 +7089,15 @@
       if (!base) return;
       setNumericFieldDisplay("age", base.age);
       setNumericFieldDisplay("retirementAge", base.retirementAge, SLIDER_BINDINGS.find((b) => b.inputId === "retirementAge"));
+      const wdStart = base.withdrawalStartAge != null
+        ? clampWithdrawalStartAge(base.withdrawalStartAge, base.retirementAge)
+        : clampRetirementAge(base.retirementAge);
+      setNumericFieldDisplay("withdrawalStartAge", wdStart, SLIDER_BINDINGS.find((b) => b.inputId === "withdrawalStartAge"));
+      syncWithdrawalStartAgeBounds();
       setNumericFieldDisplay("lifeExpectancy", base.lifeExpectancy);
       setNumericFieldDisplay("k401", base.k401, { currency: true });
       setNumericFieldDisplay("pension", base.pension, { currency: true });
+      setNumericFieldDisplay("pensionMonthly", base.pensionMonthly ?? 0, { currency: true });
       setNumericFieldDisplay("inflation", base.inflation, SLIDER_BINDINGS.find((b) => b.inputId === "inflation"));
       document.getElementById("inflateSpending").checked = !!base.inflateSpending;
       const coverageEl = document.getElementById("healthcareCoverageType");
@@ -6968,9 +7181,11 @@
         base: {
           age: base.age,
           retirementAge: base.retirementAge,
+          withdrawalStartAge: base.withdrawalStartAge,
           lifeExpectancy: base.lifeExpectancy,
           k401: base.k401,
           pension: base.pension,
+          pensionMonthly: base.pensionMonthly ?? 0,
           inflation: base.inflation * 100,
           inflateSpending: base.inflateSpending,
           healthcareCoverageType: base.healthcareCoverageType,
@@ -7190,13 +7405,24 @@
 
       const lead = `This is a ${planStrength} retirement plan ${placeLead}.`;
 
+      const pensionOnly = isPensionOnlyPlan(params);
+      const coverageMsg = end?.coverage?.message
+        || (pensionOnly ? getPensionOnlyCoverageSummary(params)?.message : null);
       const bullets = [
         buildHouseLivingBullet(params),
         `${fmt.format(getTotalMonthlySpending(params))} monthly spending target (incl. healthcare)`,
+        pensionOnly && coverageMsg
+          ? coverageMsg
+          : ((params.pensionMonthly || 0) > 0
+            ? `${fmt.format(params.pensionMonthly)}/mo pension income from age ${params.retirementAge} (${fmt.format((params.pensionMonthly || 0) * 12)}/yr) reduces portfolio withdrawals`
+            : null),
+        pensionOnly ? "No 401(k) / portfolio balance — pension is the primary income source" : null,
         formatInflowsSummaryLine(params.inflows),
-      ];
+      ].filter(Boolean);
 
-      const closing = buildAge90Closing(params, end);
+      const closing = pensionOnly && end?.coverage?.fullCoverage
+        ? `Pension income funds retirement through age ${params.lifeExpectancy} without portfolio withdrawals.`
+        : buildAge90Closing(params, end);
 
       const houseClause = params.house > 0
         ? `a ${fmt.format(params.house)} home purchase in ${params.houseYear}`
@@ -7206,7 +7432,11 @@
         ? formatInflowParts(params.inflows).join(" + ")
         : "no optional inflows modeled yet";
 
-      const footnote = `This is a ${planStrength} retirement plan ${placeLead}: ${houseClause}, ${fmt.format(params.spending)} monthly spending${params.inflows.length ? `, and optional inflows of ${inflowClause}` : `, with ${inflowClause.toLowerCase()}`}. ${closing}`;
+      const pensionClause = (params.pensionMonthly || 0) > 0
+        ? `, ${fmt.format(params.pensionMonthly)}/mo pension income`
+        : "";
+
+      const footnote = `This is a ${planStrength} retirement plan ${placeLead}: ${houseClause}, ${fmt.format(params.spending)} monthly spending${pensionClause}${params.inflows.length ? `, and optional inflows of ${inflowClause}` : `, with ${inflowClause.toLowerCase()}`}. ${closing}`;
 
       return { lead, bullets, closing, footnote };
     }
@@ -7289,12 +7519,15 @@
     }
 
     function readBaseParams() {
+      const retirementAge = readRetirementAge();
       return {
         age: readNumericField("age", 50),
-        retirementAge: readRetirementAge(),
+        retirementAge,
+        withdrawalStartAge: readWithdrawalStartAge(retirementAge),
         lifeExpectancy: readNumericField("lifeExpectancy", 90),
         k401: readNumericField("k401", 500000),
         pension: readNumericField("pension", 300000),
+        pensionMonthly: readNumericField("pensionMonthly", 0),
         inflation: readNumericField("inflation", 2.5) / 100,
         inflateSpending: document.getElementById("inflateSpending").checked,
         locationRegion: getLocationRegion(),
@@ -7310,9 +7543,15 @@
     function buildTaxEstimate(params, taxRow) {
       const includeResidenceTax = shouldIncludeResidenceTax(params);
       const ssAnnual = Math.max(0, taxRow.ssBenefit || 0);
-      const solved = solveGrossIraWithdrawal(getTotalMonthlySpending(params), ssAnnual, { includeResidenceTax });
+      const pensionIncome = Math.max(0, taxRow.pensionIncome || getPensionIncomeAnnual(params, taxRow.age));
+      const totalSpending = getTotalMonthlySpending(params);
+      const netPortfolioMonthly = Math.max(0, totalSpending - ssAnnual / 12 - pensionIncome / 12);
+      const solved = solveGrossIraWithdrawal(netPortfolioMonthly, ssAnnual, {
+        includeResidenceTax,
+        pensionIncome,
+      });
       const grossIraAnnual = solved.grossWithdrawalMonthly * 12;
-      const taxableIncome = grossIraAnnual + ssAnnual * SS_TAXABLE_PORTION;
+      const taxableIncome = grossIraAnnual + ssAnnual * SS_TAXABLE_PORTION + pensionIncome;
       const usTax = calcFederalTax(taxableIncome);
       const assumeFlat = document.getElementById("assumeFlatTaxRegime")?.checked;
       const italyNormalTax = calcItalyNormalTax(taxableIncome);
@@ -7325,6 +7564,7 @@
         ...solved,
         age: taxRow.age,
         ssAnnual,
+        pensionIncome,
         grossIraAnnual,
         taxableIncome,
         usTax,
@@ -7333,7 +7573,8 @@
         residenceTax,
         totalTax: usTax + residenceTax,
         flatVsNormalSavings: Math.max(0, italyNormalTax - italyFlatTax),
-        grossCash: grossIraAnnual + ssAnnual,
+        grossCash: grossIraAnnual + ssAnnual + pensionIncome,
+        desiredSpendingMonthly: totalSpending,
         includeResidenceTax,
         assumeFlat,
       };
@@ -7773,13 +8014,24 @@
 
       const lead = `This is a ${planStrength} retirement plan ${placeLead}.`;
 
+      const pensionOnly = isPensionOnlyPlan(params);
+      const coverageMsg = end?.coverage?.message
+        || (pensionOnly ? getPensionOnlyCoverageSummary(params)?.message : null);
       const bullets = [
         buildHouseLivingBullet(params),
         `${fmt.format(getTotalMonthlySpending(params))} monthly spending target (incl. healthcare)`,
+        pensionOnly && coverageMsg
+          ? coverageMsg
+          : ((params.pensionMonthly || 0) > 0
+            ? `${fmt.format(params.pensionMonthly)}/mo pension income from age ${params.retirementAge} (${fmt.format((params.pensionMonthly || 0) * 12)}/yr) reduces portfolio withdrawals`
+            : null),
+        pensionOnly ? "No 401(k) / portfolio balance — pension is the primary income source" : null,
         formatInflowsSummaryLine(params.inflows),
-      ];
+      ].filter(Boolean);
 
-      const closing = buildAge90Closing(params, end);
+      const closing = pensionOnly && end?.coverage?.fullCoverage
+        ? `Pension income funds retirement through age ${params.lifeExpectancy} without portfolio withdrawals.`
+        : buildAge90Closing(params, end);
 
       const houseClause = params.house > 0
         ? `a ${fmt.format(params.house)} home purchase in ${params.houseYear}`
@@ -7789,7 +8041,11 @@
         ? formatInflowParts(params.inflows).join(" + ")
         : "no optional inflows modeled yet";
 
-      const footnote = `This is a ${planStrength} retirement plan ${placeLead}: ${houseClause}, ${fmt.format(params.spending)} monthly spending${params.inflows.length ? `, and optional inflows of ${inflowClause}` : `, with ${inflowClause.toLowerCase()}`}. ${closing}`;
+      const pensionClause = (params.pensionMonthly || 0) > 0
+        ? `, ${fmt.format(params.pensionMonthly)}/mo pension income`
+        : "";
+
+      const footnote = `This is a ${planStrength} retirement plan ${placeLead}: ${houseClause}, ${fmt.format(params.spending)} monthly spending${pensionClause}${params.inflows.length ? `, and optional inflows of ${inflowClause}` : `, with ${inflowClause.toLowerCase()}`}. ${closing}`;
 
       return { lead, bullets, closing, footnote };
     }
@@ -8149,6 +8405,34 @@
     }
 
     function getProbabilityOfSuccess(rows, params) {
+      if (isPensionOnlyPlan(params)) {
+        const coverage = getPensionOnlyCoverageSummary(params, rows);
+        if (coverage?.fullCoverage) {
+          const margin = coverage.spendingMo > 0
+            ? coverage.surplusMo / coverage.spendingMo
+            : 1;
+          const pct = Math.min(99, Math.round(92 + Math.max(0, Math.min(7, margin * 15))));
+          return {
+            label: `${pct}%+`,
+            className: "high",
+            note: coverage.surplusMo >= 0
+              ? `Pension surplus ${fmt.format(coverage.surplusMo)}/mo`
+              : "Pension income covers spending",
+          };
+        }
+        if (coverage && coverage.lastCoveredAge != null) {
+          const fundedYears = Math.max(0, coverage.lastCoveredAge - params.retirementAge + 1);
+          const planYears = Math.max(1, params.lifeExpectancy - params.retirementAge + 1);
+          const pct = Math.max(8, Math.round((fundedYears / planYears) * 100));
+          return {
+            label: `${pct}%`,
+            className: pct >= 50 ? "mid" : "low",
+            note: `Shortfall at age ${coverage.lastCoveredAge + 1}`,
+          };
+        }
+        return { label: "15%", className: "low", note: "Pension below spending" };
+      }
+
       const depletedRow = rows.find((r) => r.depleted);
       const row90 = rows.find((r) => r.age === 90);
       const lastRow = rows[rows.length - 1];
@@ -8162,6 +8446,15 @@
       }
       if (!depletedRow && endRow.age >= params.lifeExpectancy && endRow.endBalance > 0) {
         return { label: "97%+", className: "high", note: "Plan completes with funds" };
+      }
+      // Income-covered plan with $0 portfolio (e.g. pension + SS, no 401k)
+      if (!depletedRow && endRow.age >= params.lifeExpectancy) {
+        const retired = rows.filter((r) => r.age >= params.retirementAge);
+        const incomeOk = retired.length > 0
+          && retired.every((r) => (r.residualShortfall || 0) <= 1);
+        if (incomeOk) {
+          return { label: "96%+", className: "high", note: "Income covers spending" };
+        }
       }
       if (depletedRow) {
         const fundedYears = depletedRow.age - params.retirementAge;
@@ -8204,6 +8497,8 @@
         round: (v, step) => Math.round(v / step) * step },
       { sliderId: "sliderRetirementAge", inputId: "retirementAge",
         round: (v) => clampRetirementAge(v) },
+      { sliderId: "sliderWithdrawalStartAge", inputId: "withdrawalStartAge",
+        round: (v) => clampWithdrawalStartAge(v) },
       { sliderId: "sliderReturnRate", inputId: "returnRate",
         round: (v, step) => Math.round(v / step) * step, decimal: true },
       { sliderId: "sliderInflation", inputId: "inflation",
@@ -8261,6 +8556,8 @@
         val = clampInflowAmount(val, false);
       } else if (binding.inputId === "retirementAge") {
         val = clampRetirementAge(val);
+      } else if (binding.inputId === "withdrawalStartAge") {
+        val = clampWithdrawalStartAge(val);
       } else if (binding.decimal) {
         val = binding.round(val, step);
       } else if (binding.round) {
@@ -8283,10 +8580,18 @@
       const slider = document.getElementById(binding.sliderId);
       if (!input || !slider) return null;
 
+      const prevRetirementAge = binding.inputId === "retirementAge"
+        ? committedNumericValues.get("retirementAge")
+        : null;
       const val = clampToInputRange(input, slider, binding);
       committedNumericValues.set(binding.inputId, val);
       input.value = formatInputDisplay(input, val, binding);
       slider.value = isInflowAmountInput(binding.inputId) ? inflowSliderPosition(val) : val;
+      if (binding.inputId === "retirementAge") {
+        syncWithdrawalStartAgeBounds(prevRetirementAge);
+      } else if (binding.inputId === "withdrawalStartAge") {
+        updateWithdrawalStartAgeBoundsLabels();
+      }
       updateSliderFill(slider);
       if (recalc) {
         clearWhatIfHighlight();
@@ -8369,6 +8674,9 @@
         } else if (binding.inputId === "retirementAge") {
           val = clampRetirementAge(parsed);
           sliderVal = val;
+        } else if (binding.inputId === "withdrawalStartAge") {
+          val = clampWithdrawalStartAge(parsed);
+          sliderVal = val;
         } else if (binding.decimal) {
           val = binding.round(parsed, step);
           sliderVal = val;
@@ -8387,8 +8695,14 @@
           clearWhatIfHighlight();
           scheduleRecalculate();
         } else if (val >= min && val <= max) {
+          const prevRetirementAge = binding.inputId === "retirementAge"
+            ? committedNumericValues.get("retirementAge")
+            : null;
           slider.value = sliderVal;
           committedNumericValues.set(binding.inputId, val);
+          if (binding.inputId === "retirementAge") {
+            syncWithdrawalStartAgeBounds(prevRetirementAge);
+          }
           updateSliderFill(slider);
           clearWhatIfHighlight();
           scheduleRecalculate();
@@ -8406,7 +8720,18 @@
       slider.addEventListener("input", () => {
         let val = Number(slider.value);
         if (binding.inputId === "retirementAge") {
+          const prevRetirementAge = committedNumericValues.get("retirementAge");
           val = clampRetirementAge(val);
+          committedNumericValues.set(binding.inputId, val);
+          input.value = formatInputDisplay(input, val, binding);
+          updateSliderFill(slider);
+          syncWithdrawalStartAgeBounds(prevRetirementAge);
+          clearWhatIfHighlight();
+          scheduleRecalculate();
+          return;
+        }
+        if (binding.inputId === "withdrawalStartAge") {
+          val = clampWithdrawalStartAge(val);
         } else if (isInflowAmountInput(binding.inputId)) {
           val = clampInflowAmount(val, false);
         }
@@ -8493,6 +8818,7 @@
       const currencyFields = [
         { id: "k401", min: 0, max: 10000000, step: 1, currency: true },
         { id: "pension", min: 0, max: 10000000, step: 1, currency: true },
+        { id: "pensionMonthly", min: 0, max: 50000, step: 50, currency: true },
         { id: "house", min: 0, max: 5000000, step: 1000, currency: true },
         { id: "annualDonations", min: 0, max: 1000000, step: 1, currency: true },
         { id: "specialOutflowAmount", min: 0, max: 100000000, step: 1, currency: true },
@@ -8798,8 +9124,17 @@
         badgeEl.className = `current-plan-summary-mc-badge mc-success-${successClass}`;
       }
 
-      medianEl.textContent = formatMcBalanceCompact(mc.p50);
-      rangeEl.textContent = `${formatMcBalanceCompact(mc.p10)} – ${formatMcBalanceCompact(mc.p90)}`;
+      if (mc.pensionOnly) {
+        medianEl.textContent = mc.p50 > 0
+          ? `${formatMcBalanceCompact(mc.p50)} surplus`
+          : "$0 portfolio";
+        rangeEl.textContent = mc.p90 > 0
+          ? `${formatMcBalanceCompact(mc.p10)} – ${formatMcBalanceCompact(mc.p90)}`
+          : "Income-funded";
+      } else {
+        medianEl.textContent = formatMcBalanceCompact(mc.p50);
+        rangeEl.textContent = `${formatMcBalanceCompact(mc.p10)} – ${formatMcBalanceCompact(mc.p90)}`;
+      }
     }
 
     function updateCurrentPlanSummary(params, mc) {
@@ -8811,12 +9146,46 @@
       const houseLabel = params.house > 0
         ? `One-time House Buy (${params.houseYear})`
         : "One-time House Buy";
+      const pensionOnly = isPensionOnlyPlan(params);
+      const coverage = pensionOnly ? getPensionOnlyCoverageSummary(params) : null;
 
+      const gapYears = getWithdrawalGapYears(params);
       const items = [
         { label: "Location", value: locationValue },
         { label: "Monthly Spending", value: formatSpendingSummaryValue(params), highlight: true },
         { label: "Retirement Age", value: String(params.retirementAge) },
-        { label: "Expected Return Rate", value: `${(params.returnRate * 100).toFixed(1)}%` },
+        {
+          label: "Withdrawals Start",
+          value: gapYears > 0
+            ? `Age ${params.withdrawalStartAge} (${gapYears} gap yr${gapYears === 1 ? "" : "s"} · cash buffer)`
+            : `Age ${params.withdrawalStartAge}`,
+        },
+        {
+          label: "Portfolio / 401(k)",
+          value: (params.k401 || 0) > 0 ? fmt.format(params.k401) : "$0",
+        },
+        {
+          label: "Pension Lump Sum",
+          value: (params.pension || 0) > 0 ? fmt.format(params.pension) : "$0",
+        },
+        {
+          label: "Monthly Pension Income",
+          value: (params.pensionMonthly || 0) > 0
+            ? `${fmt.format(params.pensionMonthly)}/mo from age ${params.retirementAge}`
+            : "$0",
+          highlight: (params.pensionMonthly || 0) > 0,
+        },
+        ...(pensionOnly && coverage
+          ? [{
+              label: "Pension vs Spending",
+              value: coverage.message,
+              highlight: coverage.fullCoverage,
+            }]
+          : []),
+        {
+          label: "Expected Return Rate",
+          value: pensionOnly ? "N/A (pension-only)" : `${(params.returnRate * 100).toFixed(1)}%`,
+        },
         { label: "Inflation Rate", value: `${(params.inflation * 100).toFixed(1)}%` },
         { label: "Inflate Spending", value: params.inflateSpending ? "On" : "Off" },
         { label: houseLabel, value: formatHouseBuySummaryValue(params) },
@@ -9124,6 +9493,10 @@
       const withdrawalRate = withdrawal.actualRate != null
         ? `${withdrawal.actualRate.toFixed(1)}%`
         : "—";
+      const pensionOnly = isPensionOnlyPlan(params);
+      const coverage = pensionOnly
+        ? getPensionOnlyCoverageSummary(params, result.rows)
+        : null;
 
       return [
         "RETIREMENT PLAN SUMMARY",
@@ -9133,7 +9506,12 @@
         "CURRENT PLAN SETTINGS",
         `• Monthly Spending: ${formatSpendingBreakdownPlain(params)}`,
         `• Retirement Age: ${params.retirementAge}`,
-        `• Expected Return Rate: ${(params.returnRate * 100).toFixed(1)}%`,
+        `• Age I Start Withdrawals: ${params.withdrawalStartAge}${getWithdrawalGapYears(params) > 0 ? ` (${getWithdrawalGapYears(params)} gap year(s) · cash buffer)` : ""}`,
+        `• Portfolio / 401(k): ${(params.k401 || 0) > 0 ? fmt.format(params.k401) : "$0"}`,
+        `• Pension Lump Sum: ${(params.pension || 0) > 0 ? fmt.format(params.pension) : "$0"}`,
+        `• Monthly Pension Income: ${(params.pensionMonthly || 0) > 0 ? `${fmt.format(params.pensionMonthly)}/mo from age ${params.retirementAge}` : "$0"}`,
+        ...(coverage ? [`• Pension coverage: ${coverage.message}`] : []),
+        `• Expected Return Rate: ${pensionOnly ? "N/A (pension-only)" : `${(params.returnRate * 100).toFixed(1)}%`}`,
         `• Inflation Rate: ${(params.inflation * 100).toFixed(1)}%`,
         `• Healthcare: ${formatHealthcareSummaryValue(params)}`,
         `• Social Security: ${fmt.format(getSsMonthlyBenefit(params))}/mo starting at age ${params.ssStartAge}`,
@@ -9141,11 +9519,20 @@
         "",
         "KEY PROJECTIONS",
         `• Success Probability: ${mc.successPct}% (${getShareSuccessLabel(mc.successPct)})`,
-        `• Median Balance at Age 90: ${formatShareBalance(mc.p50)}`,
-        `• Outcome Range (10th–90th): ${formatShareBalance(mc.p10)} – ${formatShareBalance(mc.p90)}`,
-        `• Deterministic Balance at Age 90: ${formatShareBalance(deterministicAge90)}`,
+        pensionOnly
+          ? `• Plan type: Pension-only (success based on income coverage & pension reliability)`
+          : `• Median Balance at Age 90: ${formatShareBalance(mc.p50)}`,
+        pensionOnly
+          ? `• Lifetime surplus range (stressed): ${formatShareBalance(mc.p10)} – ${formatShareBalance(mc.p90)}`
+          : `• Outcome Range (10th–90th): ${formatShareBalance(mc.p10)} – ${formatShareBalance(mc.p90)}`,
+        pensionOnly
+          ? `• Deterministic outcome: ${coverage?.message || "Income-funded"}`
+          : `• Deterministic Balance at Age 90: ${formatShareBalance(deterministicAge90)}`,
         "",
         "WITHDRAWALS",
+        ...(params.pensionMonthly > 0
+          ? [`• Monthly pension income: ${fmt.format(params.pensionMonthly)}/mo from age ${params.retirementAge}`]
+          : []),
         `• Gross monthly withdrawal needed: ${fmt.format(grossMonthly)}`,
         `• Estimated taxes: ${fmt.format(taxesMonthly)}`,
         `• Initial withdrawal rate: ${withdrawalRate}`,
@@ -9230,10 +9617,12 @@
 
       const retBinding = SLIDER_BINDINGS.find((b) => b.inputId === "retirementAge");
       if (retBinding) {
+        const prevRetirementAge = committedNumericValues.get("retirementAge");
         committedNumericValues.set("retirementAge", preset.retirementAge);
         document.getElementById("retirementAge").value = String(preset.retirementAge);
         document.getElementById("sliderRetirementAge").value = preset.retirementAge;
         updateSliderFill(document.getElementById("sliderRetirementAge"));
+        syncWithdrawalStartAgeBounds(prevRetirementAge);
       }
       setWhatIfButtonState(presetId);
       applyingWhatIf = false;
@@ -9263,6 +9652,29 @@
       const lastRow = rows[rows.length - 1];
       const depletedRow = rows.find((r) => r.depleted);
       const reachedPlanEnd = lastRow.age >= params.lifeExpectancy;
+      const pensionOnly = isPensionOnlyPlan(params);
+      const coverage = pensionOnly ? getPensionOnlyCoverageSummary(params, rows) : null;
+
+      if (pensionOnly && coverage) {
+        if (coverage.fullCoverage) {
+          return {
+            balance: 0,
+            meta: coverage.message,
+            className: "strong",
+            pensionOnly: true,
+            coverage,
+          };
+        }
+        if (depletedRow || !coverage.ok) {
+          return {
+            balance: 0,
+            meta: coverage.message,
+            className: "danger",
+            pensionOnly: true,
+            coverage,
+          };
+        }
+      }
 
       if (depletedRow) {
         return {
@@ -9272,6 +9684,17 @@
         };
       }
       if (reachedPlanEnd) {
+        if (lastRow.endBalance <= 0 && !depletedRow) {
+          // $0 portfolio but income covered the plan
+          return {
+            balance: 0,
+            meta: coverage?.message
+              || "Income-funded plan · no portfolio balance required",
+            className: "strong",
+            pensionOnly,
+            coverage,
+          };
+        }
         const className = lastRow.endBalance >= 1_000_000
           ? "strong"
           : lastRow.endBalance < 250000
@@ -9326,7 +9749,9 @@
     }
 
     function milestoneLabel(row, params) {
+      const wdStart = params.withdrawalStartAge ?? params.retirementAge;
       if (row.year === 1) return retirementBeginsLabel(row);
+      if (row.age === wdStart && wdStart !== params.retirementAge) return "Withdrawals start";
       if (row.ssStarts) return "SS STARTS";
       if (row.specialOutflow > 0) return "Special outflow";
       if (params.house > 0 && row.calendarYear === params.houseYear) return "Home purchase";
@@ -9335,7 +9760,9 @@
     }
 
     function isKeyProjectionAge(age, params) {
+      const wdStart = params.withdrawalStartAge ?? params.retirementAge;
       return age === params.retirementAge
+        || age === wdStart
         || age === params.ssStartAge
         || age === params.lifeExpectancy;
     }
@@ -9387,7 +9814,57 @@
       return sortedArr[lo] + (sortedArr[hi] - sortedArr[lo]) * (idx - lo);
     }
 
+    function isProjectionIncomeFunded(result, params) {
+      const lastRow = result.rows[result.rows.length - 1];
+      if (!lastRow || lastRow.age < params.lifeExpectancy) return false;
+      if (result.rows.some((r) => r.depleted)) return false;
+      const retired = result.rows.filter((r) => r.age >= params.retirementAge);
+      return retired.every((r) => (r.residualShortfall || 0) <= 1);
+    }
+
+    function runPensionOnlyMonteCarlo(params) {
+      // Stress pension reliability (payout cuts) and longevity slightly — market returns are irrelevant.
+      let successCount = 0;
+      const annualSurpluses = [];
+
+      for (let t = 0; t < MC_TRIALS; t++) {
+        // Most paths near full pension; occasional 5–15% cuts; rare deeper cuts
+        const reliability = Math.min(1.05, Math.max(0.75, 1 + gaussianRandom() * 0.06));
+        // Longevity stress: ~1/5 trials live 3 years past stated expectancy
+        const lifeBump = Math.random() < 0.2 ? 3 : 0;
+        const trialParams = {
+          ...params,
+          pensionMonthly: Math.max(0, (params.pensionMonthly || 0) * reliability),
+          lifeExpectancy: params.lifeExpectancy + lifeBump,
+        };
+        const result = runProjection(trialParams);
+        const ok = isProjectionIncomeFunded(result, trialParams);
+        if (ok) successCount += 1;
+
+        const retired = result.rows.filter((r) => r.age >= params.retirementAge);
+        const totalSurplus = retired.reduce((sum, r) => sum + Math.max(0, r.incomeSurplus || 0), 0);
+        annualSurpluses.push(totalSurplus);
+      }
+
+      annualSurpluses.sort((a, b) => a - b);
+      const base = runProjection(params);
+      const coverage = getPensionOnlyCoverageSummary(params, base.rows);
+
+      return {
+        successPct: Math.round((successCount / MC_TRIALS) * 100),
+        p10: percentile(annualSurpluses, 10),
+        p50: percentile(annualSurpluses, 50),
+        p90: percentile(annualSurpluses, 90),
+        pensionOnly: true,
+        coverage,
+      };
+    }
+
     function runMonteCarloAnalysis(params) {
+      if (isPensionOnlyPlan(params)) {
+        return runPensionOnlyMonteCarlo(params);
+      }
+
       let successCount = 0;
       const endBalances = [];
 
@@ -9398,9 +9875,15 @@
             return Math.max(-0.1, Math.min(0.17, p.returnRate + noise));
           },
         });
-        const depleted = result.rows.some((r) => r.depleted);
         const lastRow = result.rows[result.rows.length - 1];
-        const planOk = !depleted && lastRow.endBalance > 0 && lastRow.age >= params.lifeExpectancy;
+        // Success = plan lasts through life expectancy without unfunded shortfall
+        // (allows $0 ending balance when income fully covers spending)
+        const planOk = isProjectionIncomeFunded(result, params)
+          || (
+            !result.rows.some((r) => r.depleted)
+            && lastRow.endBalance > 0
+            && lastRow.age >= params.lifeExpectancy
+          );
         if (planOk) successCount += 1;
 
         const targetAge = Math.min(90, params.lifeExpectancy);
@@ -9414,6 +9897,7 @@
         p10: percentile(endBalances, 10),
         p50: percentile(endBalances, 50),
         p90: percentile(endBalances, 90),
+        pensionOnly: false,
       };
     }
 
@@ -9436,8 +9920,11 @@
 
     function getWithdrawalRateContextNote(rate, params) {
       if (rate == null || Number.isNaN(rate)) return "";
-      if (rate > 4.0 && rate <= 5.5 && params.pension > 0) {
-        return `${rate.toFixed(1)}% actual — Slightly above classic 4% rule but acceptable due to large pension lump sum + SS at ${params.ssStartAge}`;
+      if (rate > 4.0 && rate <= 5.5 && ((params.pension || 0) > 0 || (params.pensionMonthly || 0) > 0)) {
+        const pensionBits = [];
+        if ((params.pension || 0) > 0) pensionBits.push("pension lump sum");
+        if ((params.pensionMonthly || 0) > 0) pensionBits.push(`${fmt.format(params.pensionMonthly)}/mo pension`);
+        return `${rate.toFixed(1)}% actual — Slightly above classic 4% rule but acceptable due to ${pensionBits.join(" + ")} + SS at ${params.ssStartAge}`;
       }
       if (rate > 4.0 && rate <= 5.5) {
         return `${rate.toFixed(1)}% actual — Slightly above classic 4% rule but acceptable due to SS at ${params.ssStartAge}`;
@@ -9464,15 +9951,23 @@
 
     function getWithdrawalRulesMetrics(result) {
       const education = getWithdrawalEducation(result);
-      const retRow = result.rows.find((r) => r.age === result.params.retirementAge);
-      const portfolio = getRetirementPortfolioBasis(retRow);
+      const params = result.params;
+      const startAge = params.withdrawalStartAge ?? params.retirementAge;
+      const basisRow = result.rows.find((r) => r.age === startAge)
+        || result.rows.find((r) => r.age === params.retirementAge);
+      const portfolio = getRetirementPortfolioBasis(basisRow);
       const grossMonthly = education?.grossWithdrawalMonthly ?? 0;
-      const netMonthly = education?.desiredSpendingMonthly ?? getTotalMonthlySpending(result.params);
+      const totalSpending = education?.desiredSpendingMonthly ?? getTotalMonthlySpending(params);
+      const portfolioNetMonthly = Math.max(
+        0,
+        totalSpending - (education?.ssMonthly || 0) - (education?.pensionMonthly || 0),
+      );
       const annualGross = grossMonthly * 12;
       return {
         portfolio,
         grossMonthly,
-        netMonthly,
+        netMonthly: totalSpending,
+        portfolioNetMonthly,
         actualRate: portfolio > 0 ? (annualGross / portfolio) * 100 : null,
       };
     }
@@ -9489,8 +9984,22 @@
       const annual = monthly * 12;
       const low = annual * 2;
       const high = annual * 3;
-      document.getElementById("safetyBufferAmount").textContent = `${fmt.format(low)} – ${fmt.format(high)}`;
-      document.getElementById("safetyBufferDetail").textContent =
+      const gapYears = getWithdrawalGapYears(params);
+      const amountEl = document.getElementById("safetyBufferAmount");
+      const detailEl = document.getElementById("safetyBufferDetail");
+      if (!amountEl || !detailEl) return;
+
+      if (gapYears > 0) {
+        const gapCash = annual * gapYears;
+        const gapEnd = params.withdrawalStartAge - 1;
+        amountEl.textContent = fmt.format(gapCash);
+        detailEl.textContent =
+          `${gapYears} gap year${gapYears === 1 ? "" : "s"} (ages ${params.retirementAge}–${gapEnd}) funded from cash/savings — about ${fmt.format(gapCash)} at today's spending (${fmt.format(monthly)}/mo), with $0 from the retirement portfolio. After withdrawals begin at ${params.withdrawalStartAge}, also keep 2–3 years (${fmt.format(low)}–${fmt.format(high)}) in cash or short-term bonds.`;
+        return;
+      }
+
+      amountEl.textContent = `${fmt.format(low)} – ${fmt.format(high)}`;
+      detailEl.textContent =
         `Based on ${fmt.format(monthly)}/mo (${fmt.format(annual)}/yr incl. healthcare), keep 2–3 years in cash or short-term bonds — ${fmt.format(low)} to ${fmt.format(high)} set aside from equities.`;
     }
 
@@ -9518,17 +10027,35 @@
         result.successPct >= 90 ? " high" : result.successPct >= 75 ? " mid" : " low"
       );
 
-      document.getElementById("mcMedian").textContent = formatMcBalanceCompact(result.p50);
-      document.getElementById("mcRange").textContent =
-        `${formatMcBalanceCompact(result.p10)} – ${formatMcBalanceCompact(result.p90)}`;
-
-      noteEl.textContent =
-        `${MC_TRIALS} simulated paths for ${params.scenarioName} · returns vary ±${(MC_RETURN_VOLATILITY * 100).toFixed(0)}% around your ${(params.returnRate * 100).toFixed(1)}% average. Success = funds last through age ${params.lifeExpectancy} without depletion.`;
+      if (result.pensionOnly) {
+        document.getElementById("mcMedian").textContent = result.p50 > 0
+          ? `${formatMcBalanceCompact(result.p50)} surplus`
+          : "$0 portfolio";
+        document.getElementById("mcRange").textContent = result.p90 > 0
+          ? `${formatMcBalanceCompact(result.p10)} – ${formatMcBalanceCompact(result.p90)} lifetime surplus`
+          : "Income-funded · $0 portfolio";
+        const coverMsg = result.coverage?.message
+          ? ` ${result.coverage.message}.`
+          : "";
+        noteEl.textContent =
+          `${MC_TRIALS} pension-only paths for ${params.scenarioName} · stresses pension reliability (~±6%) and longevity.`
+          + ` Success = pension (+ SS) covers spending through age ${params.lifeExpectancy} with no shortfall.`
+          + coverMsg;
+      } else {
+        document.getElementById("mcMedian").textContent = formatMcBalanceCompact(result.p50);
+        document.getElementById("mcRange").textContent =
+          `${formatMcBalanceCompact(result.p10)} – ${formatMcBalanceCompact(result.p90)}`;
+        noteEl.textContent =
+          `${MC_TRIALS} simulated paths for ${params.scenarioName} · returns vary ±${(MC_RETURN_VOLATILITY * 100).toFixed(0)}% around your ${(params.returnRate * 100).toFixed(1)}% average. Success = funds last through age ${params.lifeExpectancy} without depletion.`;
+      }
     }
 
     function updateWithdrawalRules(result) {
       const data = getWithdrawalRulesMetrics(result);
-      const grossLabel = formatWithdrawalGrossLabel(data.grossMonthly, data.netMonthly);
+      const grossLabel = formatWithdrawalGrossLabel(
+        data.grossMonthly,
+        data.portfolioNetMonthly ?? data.netMonthly,
+      );
       const totalSpendingLabel = `${fmt.format(data.netMonthly)}/mo total spending`;
       const rateContextNote = getWithdrawalRateContextNote(data.actualRate, result.params);
 
@@ -9538,10 +10065,17 @@
           + `<span class="wr-col-spending-detail">${grossLabel}</span>`;
       }
 
-      document.getElementById("withdrawalRulesIntro").textContent =
-        "Compare your planned spending and gross portfolio withdrawal against classic withdrawal guidelines at retirement.";
-      document.getElementById("withdrawalRulesNote").textContent =
-        `${totalSpendingLabel} (${grossLabel} gross) at retirement · Green = safe · Yellow = borderline · Red = above safe zone`;
+      if (isPensionOnlyPlan(result.params)) {
+        document.getElementById("withdrawalRulesIntro").textContent =
+          "Pension-only plan — classic withdrawal-rate rules apply to portfolio draws. With $0 portfolio, success depends on pension income covering spending.";
+        document.getElementById("withdrawalRulesNote").textContent =
+          `${totalSpendingLabel} · Gross portfolio withdrawal ${grossLabel} · Pension is the primary income source`;
+      } else {
+        document.getElementById("withdrawalRulesIntro").textContent =
+          "Compare your planned spending and gross portfolio withdrawal against classic withdrawal guidelines at retirement.";
+        document.getElementById("withdrawalRulesNote").textContent =
+          `${totalSpendingLabel} (${grossLabel} gross) at retirement · Green = safe · Yellow = borderline · Red = above safe zone`;
+      }
 
       function ruleCell(ruleRate) {
         if (data.portfolio <= 0) return "<td>—</td>";
@@ -9582,9 +10116,13 @@
 
       let balance = params.k401;
 
+      const withdrawalStartAge = params.withdrawalStartAge ?? params.retirementAge;
+
       for (let age = params.age; age <= params.lifeExpectancy; age++) {
         const calendarYear = BASE_YEAR + (age - params.age);
         const isRetired = age >= params.retirementAge;
+        const withdrawalsActive = age >= withdrawalStartAge;
+        const cashFundedGap = isRetired && !withdrawalsActive;
         const yearIndex = age - params.retirementAge;
         const annualRate = resolveReturnRate(params, {
           age,
@@ -9623,22 +10161,44 @@
         }
 
         let ssBenefit = 0;
+        let pensionIncome = 0;
         let livingNeed = 0;
         let portfolioNeed = 0;
+        let cashBufferNeed = 0;
+        let incomeSurplus = 0;
+        let residualShortfall = 0;
+        let monthlySurplus = 0;
 
         if (isRetired) {
           const healthcareAnnual = getHealthcareAnnualCost(params, yearIndex, age);
           livingNeed = params.spending * 12 * getSpendingMultiplier(params, yearIndex) + healthcareAnnual;
           const ssActive = age >= params.ssStartAge;
           ssBenefit = ssActive ? getSsAnnualBenefit(params) : 0;
-          portfolioNeed = Math.max(0, livingNeed - ssBenefit);
-          if ((params.annualDonations ?? 0) > 0) {
+          pensionIncome = getPensionIncomeAnnual(params, age);
+          // Pension (+ SS) vs spending — positive = surplus, negative = shortfall before portfolio
+          incomeSurplus = pensionIncome + ssBenefit - livingNeed;
+          monthlySurplus = incomeSurplus / 12;
+          const netLivingNeed = Math.max(0, livingNeed - ssBenefit - pensionIncome);
+          // Gap years: living costs come from cash buffer/savings — $0 from portfolio.
+          // Monthly pension still reduces cash-buffer need during the gap.
+          if (cashFundedGap) {
+            cashBufferNeed = netLivingNeed;
+            portfolioNeed = 0;
+          } else {
+            portfolioNeed = netLivingNeed;
+          }
+          if (withdrawalsActive && (params.annualDonations ?? 0) > 0) {
             donationOutflow = params.annualDonations;
           }
           growth = balance * annualRate;
           balance += growth;
-          withdrawal = Math.min(balance, portfolioNeed);
+          withdrawal = withdrawalsActive ? Math.min(balance, portfolioNeed) : 0;
           balance -= withdrawal;
+          // Unfunded living costs after income + portfolio withdrawal
+          residualShortfall = Math.max(0, netLivingNeed - withdrawal);
+          // Cash-gap years assume an external cash buffer — except pension-only plans,
+          // where monthly pension is the primary income and shortfalls must surface.
+          if (cashFundedGap && !isPensionOnlyPlan(params)) residualShortfall = 0;
           if (donationOutflow > 0) {
             const donated = Math.min(balance, donationOutflow);
             balance -= donated;
@@ -9659,6 +10219,9 @@
           }
         }
 
+        // Depleted only when living costs cannot be funded (not merely $0 portfolio with income covering)
+        const yearDepleted = isRetired && residualShortfall > 1;
+
         const retYear = isRetired ? age - params.retirementAge + 1 : null;
         const row = {
           year: retYear,
@@ -9671,27 +10234,36 @@
           withdrawal,
           livingNeed,
           portfolioNeed,
+          cashBufferNeed,
           ssBenefit,
+          pensionIncome,
+          incomeSurplus,
+          monthlySurplus,
+          residualShortfall,
           pensionAdd,
           inflowTotal,
           houseCost,
           donationOutflow,
           specialOutflow,
+          cashFundedGap,
+          withdrawalsActive: isRetired && withdrawalsActive,
           ssStarts: age === params.ssStartAge,
           isMilestone: age === params.retirementAge
+            || age === withdrawalStartAge
             || (params.house > 0 && calendarYear === params.houseYear)
             || age === params.ssStartAge
             || inflowTotal > 0
-            || specialOutflow > 0,
+            || specialOutflow > 0
+            || yearDepleted,
           endBalance: Math.max(0, balance),
-          depleted: balance <= 0 && isRetired,
+          depleted: yearDepleted,
         };
 
         rows.push(row);
         chartLabels.push(age);
         chartBalances.push(Math.max(0, balance));
 
-        if (balance <= 0 && isRetired) break;
+        if (yearDepleted) break;
       }
 
       const inflowAges = [...new Set(
@@ -9702,6 +10274,7 @@
 
       const milestones = {
         retirement: params.retirementAge,
+        withdrawalStart: withdrawalStartAge !== params.retirementAge ? withdrawalStartAge : null,
         house: params.house > 0
           ? rows.find((r) => r.calendarYear === params.houseYear)?.age
           : null,
@@ -9727,6 +10300,13 @@
           + `+${fmt.format(row.pensionAdd)}<span class="inflow-label">pension lump sum</span></span>`,
         );
       }
+      if ((row.pensionIncome || 0) > 0) {
+        const highlight = isPensionOnlyPlan(params) ? " inflow-pension-highlight" : "";
+        parts.push(
+          `<span class="inflow-pension${highlight}">`
+          + `+${fmt.format(row.pensionIncome)}<span class="inflow-label">pension ${fmt.format((row.pensionIncome || 0) / 12)}/mo</span></span>`,
+        );
+      }
       getInflowsForYear(params, row.calendarYear).forEach((i) => {
         parts.push(
           `<span class="inflow-event">+${fmt.format(i.amount)}<span class="inflow-label">${i.displayName.toLowerCase()}</span></span>`,
@@ -9735,14 +10315,57 @@
       return parts.length ? parts.join("") : "—";
     }
 
-    function formatOutflowsCell(row) {
+    function formatSurplusShortfallNote(row) {
+      const monthly = row.monthlySurplus != null
+        ? row.monthlySurplus
+        : ((row.incomeSurplus || 0) / 12);
+      if (Math.abs(monthly) < 0.5) {
+        return `<span class="surplus-note">Break-even</span>`;
+      }
+      if (monthly > 0) {
+        return `<span class="surplus-note">+${fmt.format(monthly)}/mo surplus</span>`;
+      }
+      return `<span class="shortfall-note">${fmt.format(monthly)}/mo shortfall</span>`;
+    }
+
+    function formatOutflowsCell(row, params = null) {
       const withdrawal = row.withdrawal;
       const houseCost = row.houseCost ?? 0;
       const donationOutflow = row.donationOutflow ?? 0;
       const specialOutflow = row.specialOutflow ?? 0;
-      if (withdrawal <= 0 && houseCost <= 0 && donationOutflow <= 0 && specialOutflow <= 0) return "—";
       const parts = [];
+      const pensionOnly = params ? isPensionOnlyPlan(params) : false;
+
+      // Pension-only: show spending + surplus/shortfall clearly each year
+      if (pensionOnly && row.livingNeed > 0) {
+        parts.push(
+          `<span class="num">${fmt.format(row.livingNeed)}</span>`
+          + `<span class="spending-need-note">spending ${fmt.format(row.livingNeed / 12)}/mo</span>`,
+        );
+        parts.push(formatSurplusShortfallNote(row));
+        if (donationOutflow > 0) {
+          parts.push(`<span class="event-note">−${fmt.format(donationOutflow)} gifts</span>`);
+        }
+        if (specialOutflow > 0) {
+          parts.push(`<span class="event-note">−${fmt.format(specialOutflow)} special</span>`);
+        }
+        if (houseCost > 0) {
+          parts.push(`<span class="event-note">−${fmt.format(houseCost)} home</span>`);
+        }
+        return parts.join("");
+      }
+
+      if (row.cashFundedGap && (row.cashBufferNeed > 0 || row.livingNeed > 0)) {
+        const bufferNeed = row.cashBufferNeed > 0
+          ? row.cashBufferNeed
+          : Math.max(0, row.livingNeed - (row.ssBenefit || 0) - (row.pensionIncome || 0));
+        parts.push(`<span class="event-note">Cash buffer · ${fmt.format(bufferNeed)}</span>`);
+      }
       if (withdrawal > 0) parts.push(`<span class="num">${fmt.format(withdrawal)}</span>`);
+      // When pension income is present with portfolio, still show surplus/shortfall hint
+      if ((row.pensionIncome || 0) > 0 && row.livingNeed > 0 && withdrawal <= 0 && !row.cashFundedGap) {
+        parts.push(formatSurplusShortfallNote(row));
+      }
       if (donationOutflow > 0) {
         parts.push(`<span class="event-note">−${fmt.format(donationOutflow)} gifts</span>`);
       }
@@ -9752,7 +10375,7 @@
       if (houseCost > 0) {
         parts.push(`<span class="event-note">−${fmt.format(houseCost)} home</span>`);
       }
-      return parts.join("");
+      return parts.length ? parts.join("") : "—";
     }
 
     function formatSocialSecurityCell(row, prevRow) {
@@ -9825,9 +10448,146 @@
       return taxEur * EUR_USD;
     }
 
+    function getPensionIncomeAnnual(params, age = null) {
+      const monthly = Math.max(0, Number(params.pensionMonthly) || 0);
+      if (monthly <= 0) return 0;
+      if (age != null && age < params.retirementAge) return 0;
+      return monthly * 12;
+    }
+
+    /** True when plan has no portfolio/lump sum and relies on monthly pension income. */
+    function isPensionOnlyPlan(params) {
+      if (!params) return false;
+      const k401 = Math.max(0, Number(params.k401) || 0);
+      const lump = Math.max(0, Number(params.pension) || 0);
+      const monthly = Math.max(0, Number(params.pensionMonthly) || 0);
+      return k401 <= 0 && lump <= 0 && monthly > 0;
+    }
+
+    function getMonthlyPensionVsSpending(params, row = null) {
+      const pensionMo = Math.max(0, Number(params.pensionMonthly) || 0);
+      const spendingMo = row && row.livingNeed > 0
+        ? row.livingNeed / 12
+        : getTotalMonthlySpending(params);
+      return {
+        pensionMo,
+        spendingMo,
+        surplusMo: pensionMo - spendingMo,
+      };
+    }
+
+    /**
+     * Summarize pension-only coverage for messaging and success scoring.
+     * Prefer pension-alone coverage; fall back to pension + SS when needed.
+     */
+    function getPensionOnlyCoverageSummary(params, rows = []) {
+      if (!isPensionOnlyPlan(params)) return null;
+
+      const retired = (rows || []).filter((r) => r.age >= params.retirementAge);
+      const first = retired[0] || null;
+      const { pensionMo, spendingMo, surplusMo } = getMonthlyPensionVsSpending(params, first);
+
+      // Without projection rows, use pension vs current spending only
+      if (!retired.length) {
+        if (surplusMo >= 0) {
+          return {
+            ok: true,
+            fullCoverage: true,
+            surplusMo,
+            pensionMo,
+            spendingMo,
+            lastCoveredAge: params.lifeExpectancy,
+            message: `Pension covers all spending with ${fmt.format(surplusMo)} monthly surplus`,
+            className: "strong",
+            bannerClass: "",
+          };
+        }
+        return {
+          ok: false,
+          fullCoverage: false,
+          surplusMo,
+          pensionMo,
+          spendingMo,
+          lastCoveredAge: null,
+          message: `Pension shortfall of ${fmt.format(Math.abs(surplusMo))}/mo — spending exceeds pension income`,
+          className: "danger",
+          bannerClass: "shortfall",
+        };
+      }
+
+      const firstShort = retired.find(
+        (r) => r.depleted || (r.residualShortfall || 0) > 1,
+      );
+      const lastCovered = firstShort
+        ? firstShort.age - 1
+        : (retired[retired.length - 1]?.age ?? params.lifeExpectancy);
+
+      // Income surplus including SS when available on first retired year
+      const firstIncomeSurplusMo = first
+        ? ((first.pensionIncome || 0) + (first.ssBenefit || 0) - (first.livingNeed || 0)) / 12
+        : surplusMo;
+
+      if (!firstShort) {
+        if (surplusMo >= 0) {
+          return {
+            ok: true,
+            fullCoverage: true,
+            surplusMo,
+            pensionMo,
+            spendingMo,
+            lastCoveredAge: lastCovered,
+            message: `Pension covers all spending with ${fmt.format(surplusMo)} monthly surplus`,
+            className: "strong",
+            bannerClass: "",
+          };
+        }
+        // Pension alone short, but pension+SS (or other) covers through horizon
+        return {
+          ok: true,
+          fullCoverage: true,
+          surplusMo: firstIncomeSurplusMo,
+          pensionMo,
+          spendingMo,
+          lastCoveredAge: lastCovered,
+          message: firstIncomeSurplusMo >= 0
+            ? `Pension + Social Security cover spending with ${fmt.format(firstIncomeSurplusMo)} monthly surplus`
+            : "Income covers spending through your plan horizon",
+          className: "strong",
+          bannerClass: "",
+        };
+      }
+
+      if (firstShort.age <= params.retirementAge) {
+        const shortMo = Math.abs(Math.min(0, firstIncomeSurplusMo));
+        return {
+          ok: false,
+          fullCoverage: false,
+          surplusMo: firstIncomeSurplusMo,
+          pensionMo,
+          spendingMo,
+          lastCoveredAge: null,
+          message: `Pension shortfall of ${fmt.format(shortMo)}/mo — spending exceeds pension income`,
+          className: "danger",
+          bannerClass: "shortfall",
+        };
+      }
+
+      return {
+        ok: false,
+        fullCoverage: false,
+        surplusMo: firstIncomeSurplusMo,
+        pensionMo,
+        spendingMo,
+        lastCoveredAge: lastCovered,
+        message: `Pension covers spending through age ${lastCovered}; shortfall begins at age ${firstShort.age}`,
+        className: "warning",
+        bannerClass: "partial",
+      };
+    }
+
     function getTaxReferenceRow(rows, params) {
       const retiredRows = rows.filter((r) => r.age >= params.retirementAge);
-      const withWithdrawal = retiredRows.find((r) => r.withdrawal > 0);
+      const withWithdrawal = retiredRows.find((r) => r.withdrawal > 0 || (r.pensionIncome || 0) > 0);
       if (withWithdrawal) return withWithdrawal;
 
       const atRetirement = rows.find((r) => r.age === params.retirementAge);
@@ -9841,9 +10601,11 @@
       return retiredRows[0] || rows.find((r) => r.age === params.ssStartAge);
     }
 
-    function calcTaxAttributedToWithdrawal(annualWithdrawal, annualSS = 0) {
+    function calcTaxAttributedToWithdrawal(annualWithdrawal, annualSS = 0, pensionIncome = 0) {
       if (annualWithdrawal <= 0) return 0;
-      const taxableIncome = annualWithdrawal + annualSS * SS_TAXABLE_PORTION;
+      const taxableIncome = annualWithdrawal
+        + Math.max(0, annualSS) * SS_TAXABLE_PORTION
+        + Math.max(0, pensionIncome);
       const usTax = calcFederalTax(taxableIncome);
       const assumeFlat = document.getElementById("assumeFlatTaxRegime").checked;
       const italyTax = assumeFlat
@@ -9854,7 +10616,8 @@
       return totalTax * (annualWithdrawal / taxableIncome);
     }
 
-    function solveGrossIraWithdrawal(desiredSpendingMonthly, annualSS = 0) {
+    function solveGrossIraWithdrawal(desiredSpendingMonthly, annualSS = 0, options = {}) {
+      const pensionIncome = Math.max(0, Number(options.pensionIncome) || 0);
       const desiredSpendingMonthlyRounded = Math.round(desiredSpendingMonthly);
       const afterTaxTargetAnnual = desiredSpendingMonthlyRounded * 12;
 
@@ -9871,14 +10634,14 @@
       const maxHi = afterTaxTargetAnnual * 3;
       while (
         hi < maxHi
-        && hi - calcTaxAttributedToWithdrawal(hi, annualSS) < afterTaxTargetAnnual
+        && hi - calcTaxAttributedToWithdrawal(hi, annualSS, pensionIncome) < afterTaxTargetAnnual
       ) {
         hi *= 1.25;
       }
 
       for (let i = 0; i < 64; i++) {
         const mid = (lo + hi) / 2;
-        const tax = calcTaxAttributedToWithdrawal(mid, annualSS);
+        const tax = calcTaxAttributedToWithdrawal(mid, annualSS, pensionIncome);
         const afterTax = mid - tax;
         if (afterTax < afterTaxTargetAnnual) lo = mid;
         else hi = mid;
@@ -9903,15 +10666,24 @@
       if (!taxRow) return null;
 
       const includeResidenceTax = shouldIncludeResidenceTax(params);
-      const solved = solveGrossIraWithdrawal(getTotalMonthlySpending(params), taxRow.ssBenefit, { includeResidenceTax });
+      const totalSpending = getTotalMonthlySpending(params);
+      const ssMonthly = (taxRow.ssBenefit || 0) / 12;
+      const pensionMonthly = (taxRow.pensionIncome || getPensionIncomeAnnual(params, taxRow.age)) / 12;
+      const netPortfolioMonthly = Math.max(0, totalSpending - ssMonthly - pensionMonthly);
+      const solved = solveGrossIraWithdrawal(netPortfolioMonthly, taxRow.ssBenefit || 0, {
+        includeResidenceTax,
+        pensionIncome: pensionMonthly * 12,
+      });
 
       return {
         age: taxRow.age,
-        desiredSpendingMonthly: solved.desiredSpendingMonthly,
+        desiredSpendingMonthly: totalSpending,
         grossWithdrawalMonthly: solved.grossWithdrawalMonthly,
         estimatedTaxesMonthly: solved.estimatedTaxesMonthly,
-        ssMonthly: taxRow.ssBenefit / 12,
-        hasSS: taxRow.ssBenefit > 0,
+        ssMonthly,
+        hasSS: ssMonthly > 0,
+        pensionMonthly,
+        hasPension: pensionMonthly > 0,
         includeResidenceTax,
       };
     }
@@ -9921,12 +10693,39 @@
       return `(${fmt.format(education.baseSpendingMonthly)} base + ${fmt.format(education.privateTravelMonthly)} Private + Travel)`;
     }
 
-    function withdrawalEducationNote(education) {
+    function withdrawalEducationNote(education, params = null) {
       const spend = fmt.format(education.desiredSpendingMonthly);
       const gross = fmt.format(education.grossWithdrawalMonthly);
-      let note = education.hasSS
-        ? `About ${gross}/mo from retirement accounts (before taxes), plus Social Security (${fmt.format(education.ssMonthly)}/mo), to reach ${spend}/mo after estimated US federal taxes.`
-        : `About ${gross}/mo from retirement accounts (before taxes) to reach ${spend}/mo after estimated US federal taxes.`;
+      const pensionOnly = params ? isPensionOnlyPlan(params) : false;
+
+      if (pensionOnly && education.grossWithdrawalMonthly <= 0) {
+        const surplus = (education.pensionMonthly || 0)
+          + (education.ssMonthly || 0)
+          - (education.desiredSpendingMonthly || 0);
+        let note = surplus >= 0
+          ? `Pension covers all spending with ${fmt.format(surplus)} monthly surplus — no portfolio withdrawals needed.`
+          : `Income mix covers your ${spend}/mo spending — no portfolio withdrawals needed.`;
+        if (education.hasPension) {
+          note += ` Pension: ${fmt.format(education.pensionMonthly)}/mo.`;
+        }
+        if (education.hasSS) {
+          note += ` Social Security: ${fmt.format(education.ssMonthly)}/mo.`;
+        }
+        return note;
+      }
+
+      let note = education.grossWithdrawalMonthly > 0
+        ? `About ${gross}/mo from retirement accounts (before taxes) to cover spending after other income.`
+        : `Pension and Social Security cover your ${spend}/mo spending — no portfolio withdrawal needed at this age.`;
+      if (education.hasPension) {
+        note += ` Monthly pension (${fmt.format(education.pensionMonthly)}/mo) reduces portfolio need.`;
+      }
+      if (education.hasSS) {
+        note += ` Social Security (${fmt.format(education.ssMonthly)}/mo) also reduces how much the portfolio must provide.`;
+      }
+      if (education.grossWithdrawalMonthly > 0) {
+        note += ` Target total spending: ${spend}/mo after estimated taxes.`;
+      }
       if (education.includeResidenceTax) {
         note += " Abroad residence tax included in this estimate.";
       }
@@ -9935,11 +10734,39 @@
 
     function updateWithdrawalBreakdown(prefix, education) {
       if (!education) return;
-      document.getElementById(`${prefix}Spending`).textContent = fmt.format(education.desiredSpendingMonthly);
-      document.getElementById(`${prefix}Gross`).textContent = fmt.format(education.grossWithdrawalMonthly);
-      document.getElementById(`${prefix}Taxes`).textContent = fmt.format(education.estimatedTaxesMonthly);
+      const spendingEl = document.getElementById(`${prefix}Spending`);
+      if (spendingEl) spendingEl.textContent = fmt.format(education.desiredSpendingMonthly);
+      const pensionRow = document.getElementById(`${prefix}PensionRow`);
+      const pensionEl = document.getElementById(`${prefix}Pension`);
+      if (pensionRow && pensionEl) {
+        if (education.hasPension) {
+          pensionRow.hidden = false;
+          pensionEl.textContent = fmt.format(education.pensionMonthly);
+        } else {
+          pensionRow.hidden = true;
+        }
+      }
+      const ssRow = document.getElementById(`${prefix}SsRow`);
+      const ssEl = document.getElementById(`${prefix}Ss`);
+      if (ssRow && ssEl) {
+        if (education.hasSS) {
+          ssRow.hidden = false;
+          ssEl.textContent = fmt.format(education.ssMonthly);
+        } else {
+          ssRow.hidden = true;
+        }
+      }
+      const grossEl = document.getElementById(`${prefix}Gross`);
+      if (grossEl) grossEl.textContent = fmt.format(education.grossWithdrawalMonthly);
+      const taxesEl = document.getElementById(`${prefix}Taxes`);
+      if (taxesEl) taxesEl.textContent = fmt.format(education.estimatedTaxesMonthly);
       const noteEl = document.getElementById(`${prefix}WdNote`);
-      if (noteEl) noteEl.textContent = withdrawalEducationNote(education);
+      if (noteEl) {
+        // Prefer live form params when available for pension-only messaging
+        let params = null;
+        try { params = buildParams(); } catch (_) { params = null; }
+        noteEl.textContent = withdrawalEducationNote(education, params);
+      }
     }
 
     function estimateScenarioTaxes(result) {
@@ -10239,9 +11066,11 @@
       } = estimate;
 
       document.getElementById("statUSTax").textContent = fmt.format(usTax);
+      const pensionIncomeAnnual = estimate.pensionIncome || 0;
       document.getElementById("statUSTaxDetail").textContent =
         `At age ${estimate.age} · IRA ${fmt.format(grossIraAnnual)}/yr`
         + (ssAnnual > 0 ? ` + SS ${fmt.format(ssAnnual)}/yr` : "")
+        + (pensionIncomeAnnual > 0 ? ` + pension ${fmt.format(pensionIncomeAnnual)}/yr` : "")
         + ` · taxable ${fmt.format(taxableIncome)} · MFJ 2026 brackets`;
 
       if (!usOnly) {
@@ -10269,20 +11098,25 @@
             : "<strong>Quick read:</strong> US federal tax plus illustrative residence-country tax. See the estimator below for a full breakdown.");
       }
 
+      const pensionIncome = estimate.pensionIncome || 0;
       const wdEducation = {
         desiredSpendingMonthly: estimate.desiredSpendingMonthly,
         grossWithdrawalMonthly: estimate.grossWithdrawalMonthly,
         estimatedTaxesMonthly: estimate.estimatedTaxesMonthly,
         ssMonthly: ssAnnual / 12,
         hasSS: ssAnnual > 0,
+        pensionMonthly: pensionIncome / 12,
+        hasPension: pensionIncome > 0,
         includeResidenceTax,
       };
 
       document.getElementById("statGrossWithdrawalMonthly").textContent =
         fmt.format(estimate.grossWithdrawalMonthly);
-      document.getElementById("statGrossWdNote").textContent = "";
+      document.getElementById("statGrossWdNote").textContent = pensionIncome > 0
+        ? `After ${fmt.format(pensionIncome / 12)}/mo pension${ssAnnual > 0 ? " + SS" : ""}`
+        : (ssAnnual > 0 ? `After ${fmt.format(ssAnnual / 12)}/mo SS` : "");
       document.getElementById("statGrossWithdrawalDetail").textContent =
-        withdrawalEducationNote(wdEducation);
+        withdrawalEducationNote(wdEducation, params);
     }
 
     function updateSummary(rows, params) {
@@ -10291,13 +11125,21 @@
       const lastRow = rows[rows.length - 1];
       const depletedRow = rows.find((r) => r.depleted);
       const reachedPlanEnd = lastRow.age >= params.lifeExpectancy;
+      const pensionOnly = isPensionOnlyPlan(params);
+      const coverage = pensionOnly ? getPensionOnlyCoverageSummary(params, rows) : null;
 
       document.getElementById("statRetAge").textContent = params.retirementAge;
       document.getElementById("statHouseYear").textContent = params.houseYear;
       document.getElementById("statEndAge").textContent = params.lifeExpectancy;
 
       const atRetEl = document.getElementById("statAtRetirement");
-      atRetEl.textContent = fmt.format(retirementRow ? retirementRow.endBalance : 0);
+      if (pensionOnly && coverage) {
+        atRetEl.textContent = coverage.surplusMo >= 0
+          ? `+${fmt.format(coverage.surplusMo)}/mo`
+          : `${fmt.format(coverage.surplusMo)}/mo`;
+      } else {
+        atRetEl.textContent = fmt.format(retirementRow ? retirementRow.endBalance : 0);
+      }
 
       const afterHouseCard = document.getElementById("statAfterHouseCard");
       const afterHouseEl = document.getElementById("statAfterHouse");
@@ -10311,7 +11153,21 @@
       const lastsEl = document.getElementById("statLasts");
       const lastsDetailEl = document.getElementById("statLastsDetail");
 
-      if (depletedRow) {
+      if (pensionOnly && coverage) {
+        if (coverage.fullCoverage) {
+          lastsEl.textContent = "Pension funded";
+          lastsEl.className = "stat-value";
+          lastsDetailEl.textContent = coverage.message;
+        } else if (depletedRow) {
+          lastsEl.textContent = `Shortfall at ${depletedRow.age}`;
+          lastsEl.className = "stat-value danger";
+          lastsDetailEl.textContent = coverage.message;
+        } else {
+          lastsEl.textContent = "Partial coverage";
+          lastsEl.className = "stat-value warning";
+          lastsDetailEl.textContent = coverage.message;
+        }
+      } else if (depletedRow) {
         lastsEl.textContent = `Depletes at ${depletedRow.age}`;
         lastsEl.className = "stat-value danger";
         lastsDetailEl.textContent = `Portfolio exhausted in ${depletedRow.calendarYear}`;
@@ -10327,23 +11183,33 @@
 
       const endBalEl = document.getElementById("statEndBalance");
       const endDetailEl = document.getElementById("statEndDetail");
-      endBalEl.textContent = lastRow.endBalance >= 1_000_000
-        ? fmtMillions(lastRow.endBalance)
-        : fmt.format(lastRow.endBalance);
-      endBalEl.className = "stat-value" + (
-        lastRow.endBalance <= 0
-          ? " danger"
+      if (pensionOnly && coverage) {
+        endBalEl.textContent = coverage.fullCoverage ? "Income OK" : "Shortfall";
+        endBalEl.className = "stat-value" + (coverage.fullCoverage ? " strong" : " danger");
+        endDetailEl.textContent = coverage.message;
+      } else {
+        endBalEl.textContent = lastRow.endBalance >= 1_000_000
+          ? fmtMillions(lastRow.endBalance)
+          : fmt.format(lastRow.endBalance);
+        endBalEl.className = "stat-value" + (
+          lastRow.endBalance <= 0 && depletedRow
+            ? " danger"
+            : lastRow.endBalance <= 0 && !depletedRow
+              ? " strong"
+              : lastRow.endBalance >= 1_000_000
+                ? " strong"
+                : lastRow.endBalance < 250000
+                  ? " warning"
+                  : ""
+        );
+        endDetailEl.textContent = depletedRow
+          ? "Funds ran out before plan end"
           : lastRow.endBalance >= 1_000_000
-            ? " strong"
-            : lastRow.endBalance < 250000
-              ? " warning"
-              : ""
-      );
-      endDetailEl.textContent = depletedRow
-        ? "Funds ran out before plan end"
-        : lastRow.endBalance >= 1_000_000
-          ? `Strong surplus · ${fmtMillions(lastRow.endBalance)} at age ${lastRow.age}`
-          : `${fmt.format(lastRow.endBalance)} remaining at age ${lastRow.age}`;
+            ? `Strong surplus · ${fmtMillions(lastRow.endBalance)} at age ${lastRow.age}`
+            : lastRow.endBalance <= 0 && !depletedRow
+              ? "Income covers spending · no portfolio needed"
+              : `${fmt.format(lastRow.endBalance)} remaining at age ${lastRow.age}`;
+      }
     }
 
     function getRetirementTableRows(rows, params) {
@@ -10378,9 +11244,28 @@
         ? ` Showing first <strong>${TABLE_PREVIEW_YEARS}</strong> retirement years of <strong>${retirementRows.length}</strong>.`
         : "";
       const ssRetYear = params.ssStartAge - params.retirementAge + 1;
+      const gapYears = getWithdrawalGapYears(params);
+      const wdStart = params.withdrawalStartAge ?? params.retirementAge;
+      const gapNote = gapYears > 0
+        ? ` <strong>Withdrawals start</strong> at age <strong>${wdStart}</strong> (Ret. Yr <strong>${wdStart - params.retirementAge + 1}</strong>) — gap years use cash buffer ($0 portfolio withdrawal).`
+        : "";
+      const pensionMo = Math.max(0, Number(params.pensionMonthly) || 0);
+      const pensionOnly = isPensionOnlyPlan(params);
+      const coverage = pensionOnly ? getPensionOnlyCoverageSummary(params, rows) : null;
+      const pensionNote = pensionMo > 0
+        ? (pensionOnly
+          ? ` <strong>Pension-only plan:</strong> <strong>${fmt.format(pensionMo)}/mo</strong> (${fmt.format(pensionMo * 12)}/yr) is primary income from age <strong>${params.retirementAge}</strong>.`
+            + (coverage ? ` ${coverage.message}.` : "")
+            + ` <strong>Out</strong> shows spending and monthly surplus/shortfall.`
+          : ` <strong>Monthly pension:</strong> <strong>${fmt.format(pensionMo)}/mo</strong> (${fmt.format(pensionMo * 12)}/yr) from age <strong>${params.retirementAge}</strong> reduces portfolio withdrawals.`)
+        : "";
+      const lumpNote = (params.pension || 0) > 0
+        ? `<strong>${fmt.format(params.pension)}</strong> pension lump sum in <strong>In</strong>. `
+        : "";
       document.getElementById("tableNote").innerHTML =
-        `Ret. Yr <strong>1</strong> = calendar <strong>${startYear}</strong>, age <strong>${params.retirementAge}</strong> — <strong>${fmt.format(params.pension)}</strong> pension lump sum in <strong>In</strong>. ` +
-        `<strong>SS STARTS</strong> at Ret. Yr <strong>${ssRetYear}</strong> (age <strong>${params.ssStartAge}</strong>, ${fmt.format(getSsMonthlyBenefit(params))}/mo). ${inflNote}${previewNote}`;
+        `Ret. Yr <strong>1</strong> = calendar <strong>${startYear}</strong>, age <strong>${params.retirementAge}</strong> — ${lumpNote}` +
+        `<strong>SS STARTS</strong> at Ret. Yr <strong>${ssRetYear}</strong> (age <strong>${params.ssStartAge}</strong>, ${fmt.format(getSsMonthlyBenefit(params))}/mo).` +
+        `${pensionNote}${gapNote} ${inflNote}${previewNote}`;
 
       const expandBtn = document.getElementById("expandTableBtn");
       const tableCard = document.getElementById("projectionTableCard");
@@ -10408,9 +11293,14 @@
         const tagClass = isFirst
           ? "milestone-tag retirement-tag"
           : (r.ssStarts ? "milestone-tag ss-milestone" : "milestone-tag");
+        const pensionOnly = isPensionOnlyPlan(params);
+        const hasSurplus = pensionOnly && (r.monthlySurplus || 0) > 0.5;
+        const hasShortfall = pensionOnly && ((r.monthlySurplus || 0) < -0.5 || r.depleted);
         const rowClass = [
           isFirst ? "first-retirement-row" : "",
           r.depleted ? "depleted" : "",
+          hasShortfall && !r.depleted ? "pension-shortfall-row" : "",
+          hasSurplus ? "pension-surplus-row" : "",
           r.ssStarts ? "ss-start" : "",
           isKeyAge ? "key-age-row" : "",
           !isFirst && r.isMilestone ? "milestone" : "",
@@ -10427,6 +11317,16 @@
         const calCell = (isFirst || isSsStart || isKeyAge) ? `<strong>${calYear}</strong>` : String(calYear);
         const prevRow = idx > 0 ? displayRows[idx - 1] : null;
 
+        const endCell = pensionOnly
+          ? (r.depleted
+            ? `<span class="shortfall-note">Shortfall</span>`
+            : (r.monthlySurplus > 0.5
+              ? `<span class="surplus-note">+${fmt.format(r.monthlySurplus)}/mo</span>`
+              : (r.monthlySurplus < -0.5
+                ? `<span class="shortfall-note">${fmt.format(r.monthlySurplus)}/mo</span>`
+                : "—")))
+          : fmt.format(r.endBalance);
+
         const rowHtml = `
         <tr class="${rowClass}">
           <td class="${isKeyAge ? "key-year" : ""}">${yearCell}</td>
@@ -10435,15 +11335,18 @@
           <td class="num col-start">${fmt.format(r.startBalance)}</td>
           <td class="num col-growth">${fmt.format(r.growth)}</td>
           <td class="col-in">${formatInflowsCell(r, params, isFirst)}</td>
-          <td class="col-out">${formatOutflowsCell(r)}</td>
+          <td class="col-out">${formatOutflowsCell(r, params)}</td>
           <td class="col-ss">${formatSocialSecurityCell(r, prevRow)}</td>
-          <td class="num col-end">${fmt.format(r.endBalance)}</td>
+          <td class="num col-end">${endCell}</td>
         </tr>`;
 
         if (r.ssStarts) {
+          const ssNote = pensionOnly
+            ? "Social Security begins — combined income vs spending improves"
+            : "Withdrawals drop significantly";
           return rowHtml + `
         <tr class="ss-start-note-row">
-          <td colspan="9">Withdrawals drop significantly</td>
+          <td colspan="9">${ssNote}</td>
         </tr>`;
         }
         return rowHtml;
@@ -10459,7 +11362,8 @@
 
     function buildPointRadii(labels, milestones) {
       return labels.map((age) => {
-        if (age === milestones.retirement || age === milestones.house || age === milestones.ss) return 6;
+        if (age === milestones.retirement || age === milestones.withdrawalStart
+          || age === milestones.house || age === milestones.ss) return 6;
         if (isInflowMilestone(age, milestones)) return 5;
         return 0;
       });
@@ -10468,6 +11372,7 @@
     function buildPointColors(labels, milestones) {
       return labels.map((age) => {
         if (age === milestones.retirement) return CHART_THEME.retirement;
+        if (age === milestones.withdrawalStart) return CHART_THEME.ss;
         if (age === milestones.house) return CHART_THEME.house;
         if (age === milestones.ss) return CHART_THEME.ss;
         if (isInflowMilestone(age, milestones)) return CHART_THEME.inflow;
@@ -10533,8 +11438,12 @@
       const sorrNote = showSorr
         ? `<span>First ${SORR_EARLY_RETIREMENT_YEARS} yrs vary</span>`
         : "";
+      const wdMilestoneNote = milestones.withdrawalStart
+        ? `<span><i style="background:${CHART_THEME.ss}"></i> Withdrawals · ${milestones.withdrawalStart}</span>`
+        : "";
       const milestoneItems = [
         `<span><i style="background:${CHART_THEME.retirement}"></i> Retire · ${milestones.retirement}</span>`,
+        wdMilestoneNote,
         houseNote,
         inflowNote,
         `<span><i style="background:${CHART_THEME.ss}"></i> SS · ${milestones.ss}</span>`,
@@ -10921,6 +11830,7 @@
 
     syncInflowSliderBounds();
     syncInflowYearSelects();
+    syncWithdrawalStartAgeBounds();
     syncAllSliders();
 
     document.getElementById("userLocation").addEventListener("input", handleLocationInput);

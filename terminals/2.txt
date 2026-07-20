@@ -1,0 +1,13 @@
+---
+pid: 20660
+cwd: "C:\Users\Craig\Retirement-Projection"
+command: "$script = (Get-Content \"C:\\Users\\Craig\\Retirement-Projection\\Retirement-Planner.html\" -Raw) -replace '(?s).*<script>\\s*','' -replace '(?s)\\s*</script>.*',''; $script | Out-File -Encoding utf8 \"C:\\Users\\Craig\\Retirement-Projection\\_check-script.js\"; node --check \"C:\\Users\\Craig\\Retirement-Projection\\_check-script.js\"; Remove-Item \"C:\\Users\\Craig\\Retirement-Projection\\_check-script.js\""
+started_at: 2026-06-26T00:44:34.005Z
+running_for_ms: 86400015 
+---
+
+---
+exit_code: -1
+elapsed_ms: 86400015
+ended_at: 2026-06-27T00:45:04.990Z
+---
