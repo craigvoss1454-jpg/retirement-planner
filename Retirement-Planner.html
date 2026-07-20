@@ -1996,6 +1996,69 @@
       border-radius: 8px;
     }
 
+    .surplus-box {
+      margin-top: 0.75rem;
+      padding: 0.85rem 1rem;
+      background: linear-gradient(135deg, rgba(0, 230, 118, 0.12) 0%, rgba(0, 200, 83, 0.06) 55%, var(--bg-hover) 100%);
+      border: 1px solid var(--accent-border);
+      border-radius: 10px;
+      box-shadow: 0 0 0 1px rgba(0, 230, 118, 0.05);
+    }
+
+    .surplus-box[hidden] {
+      display: none !important;
+    }
+
+    .surplus-box-title {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--accent-soft);
+      margin-bottom: 0.55rem;
+    }
+
+    .surplus-box-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.65rem 1rem;
+    }
+
+    @media (max-width: 520px) {
+      .surplus-box-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .surplus-box-stat {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+
+    .surplus-box-label {
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .surplus-box-value {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--accent);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.01em;
+    }
+
+    .surplus-box-note {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+      margin: 0.55rem 0 0;
+    }
+
     .tax-savings-single {
       grid-template-columns: 1fr !important;
     }
@@ -6089,6 +6152,22 @@
                   </p>
                 </div>
               </div>
+              <div class="surplus-box" id="surplusBox" hidden>
+                <div class="surplus-box-title">Income Surplus</div>
+                <div class="surplus-box-grid">
+                  <div class="surplus-box-stat">
+                    <span class="surplus-box-label">Annual Surplus</span>
+                    <span class="surplus-box-value" id="yearlySurplus">—</span>
+                  </div>
+                  <div class="surplus-box-stat">
+                    <span class="surplus-box-label" id="cumulativeSurplusLabel">Cumulative Surplus (by age 90)</span>
+                    <span class="surplus-box-value" id="cumulativeSurplus">—</span>
+                  </div>
+                </div>
+                <p class="surplus-box-note" id="surplusBoxNote">
+                  Extra money from pension + Social Security beyond spending (not automatically added to portfolio).
+                </p>
+              </div>
             </div>
           </div>
         </section>
@@ -6548,6 +6627,7 @@
       sorrBad: "#ff7043",
       sorrBadFill: "rgba(255, 112, 67, 0.2)",
       sorrGood: "#4dd0e1",
+      surplus: "#4dd0e1",
     };
 
     const MC_TRIALS = 1000;
@@ -7075,7 +7155,69 @@
       }
 
       updateCostOfLivingDisplay(getUserLocation(), params);
+      updateSurplusDisplay(result);
       renderPlanSummary(params, end);
+    }
+
+    function getIncomeSurplusSummary(rows, params) {
+      const targetAge = Math.min(90, params.lifeExpectancy ?? 90);
+      const retired = rows.filter((r) => r.age >= params.retirementAge && r.age <= targetAge);
+      const steadyAge = Math.max(params.retirementAge, params.ssStartAge || params.retirementAge);
+      let steadyRow = retired.find((r) => r.age === steadyAge);
+      if (!steadyRow || (steadyRow.incomeSurplus || 0) <= 0) {
+        steadyRow = retired.find((r) => (r.incomeSurplus || 0) > 0) || steadyRow || retired[0];
+      }
+
+      const annualSurplus = Math.round(Math.max(0, steadyRow?.incomeSurplus || 0));
+      let running = 0;
+      const cumulativeByAge = new Map();
+      for (const r of rows) {
+        if (r.age < params.retirementAge) continue;
+        if (r.age > targetAge) break;
+        running += Math.max(0, r.incomeSurplus || 0);
+        cumulativeByAge.set(r.age, running);
+      }
+
+      return {
+        annualSurplus,
+        cumulativeSurplus: Math.round(running),
+        hasSurplus: annualSurplus > 0 || running > 0.5,
+        steadyAge: steadyRow?.age ?? null,
+        targetAge,
+        cumulativeByAge,
+      };
+    }
+
+    function updateSurplusDisplay(result) {
+      const box = document.getElementById("surplusBox");
+      const yearlyEl = document.getElementById("yearlySurplus");
+      const cumulativeEl = document.getElementById("cumulativeSurplus");
+      const noteEl = document.getElementById("surplusBoxNote");
+      if (!box || !yearlyEl || !cumulativeEl) return;
+
+      const summary = getIncomeSurplusSummary(result.rows, result.params);
+      if (!summary.hasSurplus) {
+        box.hidden = true;
+        return;
+      }
+
+      box.hidden = false;
+      yearlyEl.textContent = fmt.format(summary.annualSurplus);
+      cumulativeEl.textContent = fmt.format(summary.cumulativeSurplus);
+
+      const cumLabel = document.getElementById("cumulativeSurplusLabel");
+      if (cumLabel) {
+        cumLabel.textContent = `Cumulative Surplus (by age ${summary.targetAge})`;
+      }
+
+      if (noteEl) {
+        const ageNote = summary.steadyAge != null
+          ? ` (illustrated at age ${summary.steadyAge})`
+          : "";
+        noteEl.textContent =
+          `Extra money from pension + Social Security beyond spending${ageNote} — not automatically added to the portfolio. `
+          + `Cumulative is the sum of yearly surpluses through age ${summary.targetAge}.`;
+      }
     }
 
     const CURRENCY_FIELD_CONFIGS = [
@@ -11426,6 +11568,13 @@
         legendMain = `<span><i style="background:${CHART_THEME.plan}"></i> ${getPlanDisplayName()}</span>`;
       }
 
+      const surplusSummary = (!showSorr && !showInflation)
+        ? getIncomeSurplusSummary(result.rows, params)
+        : null;
+      if (surplusSummary?.hasSurplus) {
+        legendMain += `<span><i style="background:${CHART_THEME.surplus}"></i> Cumulative Surplus</span>`;
+      }
+
       const endBal = balanceAtAge(result.rows, params.lifeExpectancy)
         ?? result.rows[result.rows.length - 1]?.endBalance;
       const chartSub = document.getElementById("chartHeaderSub");
@@ -11572,6 +11721,33 @@
             order: 1,
           },
         ];
+
+        if (surplusSummary?.hasSurplus) {
+          let lastCum = null;
+          const surplusSeries = labels.map((age) => {
+            if (age < params.retirementAge) return null;
+            if (surplusSummary.cumulativeByAge.has(age)) {
+              lastCum = surplusSummary.cumulativeByAge.get(age);
+              return lastCum;
+            }
+            return lastCum;
+          });
+          datasets.push({
+            label: "Cumulative Income Surplus",
+            data: surplusSeries,
+            borderColor: CHART_THEME.surplus,
+            backgroundColor: "transparent",
+            borderWidth: 2,
+            borderDash: [6, 4],
+            fill: false,
+            tension: 0.35,
+            cubicInterpolationMode: "monotone",
+            spanGaps: false,
+            pointRadius: 0,
+            pointHoverRadius: 5,
+            order: 2,
+          });
+        }
       }
 
       const yTitle = showInflation ? "Portfolio Value (USD)" : "Portfolio Value";
